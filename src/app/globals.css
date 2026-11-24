@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+:root {
+  --brand: #d5af26;          /* GK Group gold (logo) */
+  --brand-strong: #a8861a;   /* gold for text/borders on white (AA large) */
+  --brand-soft: #fbf5df;
+  --ink: #111827;
+  --ink-2: #374151;
+  --ink-3: #6b7280;
+  --line: #e5e7eb;
+  --surface: #ffffff;
+  --canvas: #f6f7f9;
+  --cat: #2b6cb0;
+  --additional: #b8860b;
+  --ok: #16a34a;
+  --info: #2563eb;
+  --warn: #d97706;
+  --bad: #dc2626;
+  --neutral: #7c8aa5;
+}
+
+@theme inline {
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-soft: var(--brand-soft);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-surface: var(--surface);
+  --color-canvas: var(--canvas);
+  --color-cat: var(--cat);
+  --color-additional: var(--additional);
+  --color-ok: var(--ok);
+  --color-info: var(--info);
+  --color-warn: var(--warn);
+  --color-bad: var(--bad);
+  --color-neutral: var(--neutral);
+  --font-sans: "Inter", "Segoe UI", ui-sans-serif, system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+html { -webkit-text-size-adjust: 100%; }
+body { background: var(--canvas); color: var(--ink); }
+
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* Thin scrollbars for the Gantt timeline */
+.scroll-thin { scrollbar-width: thin; }
+
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; }
+}

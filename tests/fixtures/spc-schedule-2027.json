@@ -1,0 +1,609 @@
+{
+ "source": "Google Sheets API, spreadsheet 13Sd-CqyoLq9cJVCsUMAj-HVWGoQtG41d4RywBPyMntc, sheet 'SPC Schedule 2027', read 2026-11-24",
+ "rows": [
+  {
+   "r": 4,
+   "I": "Project Start Date :",
+   "M": 46388
+  },
+  {
+   "r": 5,
+   "I": "Project End Date :",
+   "M": 46752
+  },
+  {
+   "r": 8,
+   "A": "Task No",
+   "B": "Task Name",
+   "E": "CAT/Additiona",
+   "F": "New/Revision",
+   "G": "Critical",
+   "H": "Start Date",
+   "I": "End Date",
+   "J": "Mandays",
+   "K": "Actual End Date",
+   "L": "Actual Days",
+   "M": "Not Start",
+   "N": "In Work",
+   "O": "Complete",
+   "P": "Total CAT",
+   "Q": "Additional",
+   "R": "% CAT",
+   "S": "%Additional",
+   "T": "Man Days",
+   "U": "Remark"
+  },
+  {
+   "r": 13,
+   "A": "Process Document Creation",
+   "T": "Actual"
+  },
+  {
+   "r": 14,
+   "A": 1,
+   "B": "Legal"
+  },
+  {
+   "r": 15,
+   "A": "1.1",
+   "B": "SOP Penyimpanan Dokumen Legal",
+   "E": "CAT",
+   "G": false,
+   "H": 46468,
+   "I": 46507,
+   "N": 0.5
+  },
+  {
+   "r": 16,
+   "A": "1.2",
+   "B": "xxxx",
+   "E": "Additional",
+   "N": 0.3
+  },
+  {
+   "r": 17,
+   "A": "1.3"
+  },
+  {
+   "r": 18,
+   "A": "1.4"
+  },
+  {
+   "r": 19,
+   "A": 2,
+   "B": "GA"
+  },
+  {
+   "r": 20,
+   "A": "2.1"
+  },
+  {
+   "r": 21,
+   "A": "2.2",
+   "F": "Revision",
+   "G": false
+  },
+  {
+   "r": 22,
+   "A": "2.3"
+  },
+  {
+   "r": 23,
+   "A": "2.4",
+   "F": "New",
+   "G": false,
+   "H": 46296,
+   "I": 46325
+  },
+  {
+   "r": 24,
+   "A": 3,
+   "B": "Procurement"
+  },
+  {
+   "r": 25,
+   "A": "3.1",
+   "B": "SOP Pengadaan Barang dan Jasa",
+   "E": "CAT",
+   "G": false,
+   "H": 46510,
+   "I": 46549,
+   "M": 0
+  },
+  {
+   "r": 26,
+   "A": "3.2"
+  },
+  {
+   "r": 27,
+   "A": "3.3"
+  },
+  {
+   "r": 28,
+   "A": "3.4"
+  },
+  {
+   "r": 29,
+   "A": 4,
+   "B": "ITM"
+  },
+  {
+   "r": 30,
+   "A": "4.1",
+   "B": "SOP Mekanisme Permintaan Layanan IT",
+   "E": "CAT",
+   "G": false,
+   "H": 46468,
+   "I": 46507,
+   "M": 0
+  },
+  {
+   "r": 31,
+   "A": "4.2",
+   "B": "SOP Pengelolaan Akses Perangkat Keras dan Perangkat Lunak IT",
+   "E": "CAT",
+   "G": false,
+   "H": 46510,
+   "I": 46549,
+   "M": 0
+  },
+  {
+   "r": 32,
+   "A": "4.3",
+   "B": "SOP Pengelolaan Aset ITM",
+   "E": "CAT",
+   "G": false,
+   "H": 46398,
+   "I": 46430,
+   "N": 0.5
+  },
+  {
+   "r": 33,
+   "A": "4.4",
+   "B": "SOP Tata Kelola Proyek ITM",
+   "G": false,
+   "H": 46468,
+   "I": 46507
+  },
+  {
+   "r": 34,
+   "A": "4.5",
+   "G": false
+  },
+  {
+   "r": 35,
+   "A": "4.6",
+   "G": false
+  },
+  {
+   "r": 36,
+   "A": 5,
+   "B": "R & A"
+  },
+  {
+   "r": 37,
+   "A": "5.1",
+   "F": "New",
+   "G": true
+  },
+  {
+   "r": 38,
+   "A": "5.2"
+  },
+  {
+   "r": 39,
+   "A": 6,
+   "B": "HC"
+  },
+  {
+   "r": 40,
+   "A": "6.1",
+   "B": "SOP Mutasi, Promosi, dan Demosi",
+   "E": "CAT",
+   "G": false,
+   "H": 46468,
+   "I": 46507,
+   "M": 0
+  },
+  {
+   "r": 41,
+   "A": "6.2",
+   "B": "SOP Recruitment",
+   "E": "CAT",
+   "G": false,
+   "H": 46468,
+   "I": 46507,
+   "M": 0
+  },
+  {
+   "r": 42,
+   "A": "6.3",
+   "B": "SOP Performance Management",
+   "E": "CAT",
+   "G": false,
+   "H": 46433,
+   "I": 46470,
+   "M": 0
+  },
+  {
+   "r": 43,
+   "A": "6.4",
+   "B": "SOP Program Magang",
+   "E": "CAT",
+   "G": false,
+   "H": 46433,
+   "I": 46470,
+   "M": 0
+  },
+  {
+   "r": 44,
+   "A": "6.5",
+   "G": false
+  },
+  {
+   "r": 45,
+   "A": "6.6",
+   "G": false
+  },
+  {
+   "r": 46,
+   "A": "6.7",
+   "G": false
+  },
+  {
+   "r": 47,
+   "A": 7,
+   "B": "FAT"
+  },
+  {
+   "r": 48,
+   "A": "7.1",
+   "B": "SOP Pengelolaan Aset",
+   "E": "CAT",
+   "G": false,
+   "H": 46398,
+   "I": 46430,
+   "M": 0
+  },
+  {
+   "r": 49,
+   "A": "7.2",
+   "B": "SOP Pembayaran",
+   "E": "CAT",
+   "G": false,
+   "H": 46433,
+   "I": 46470,
+   "M": 0
+  },
+  {
+   "r": 50,
+   "A": "7.3",
+   "B": "SOP Reimbursement",
+   "E": "CAT",
+   "G": false,
+   "H": 46433,
+   "I": 46470,
+   "M": 0
+  },
+  {
+   "r": 51,
+   "A": "7.4",
+   "B": "SOP Cash Advance",
+   "E": "CAT",
+   "G": false,
+   "H": 46433,
+   "I": 46470,
+   "M": 0
+  },
+  {
+   "r": 52,
+   "A": "7.5",
+   "B": "SOP Penagihan",
+   "E": "CAT",
+   "G": false,
+   "M": 0
+  },
+  {
+   "r": 53,
+   "A": "7.6",
+   "B": "Kebijakan Pengelolaan Pajak",
+   "E": "CAT",
+   "G": false,
+   "H": 46398,
+   "I": 46430,
+   "M": 0
+  },
+  {
+   "r": 54,
+   "A": "7.7",
+   "B": "SOP Investment",
+   "E": "CAT",
+   "G": false,
+   "H": 46468,
+   "I": 46507,
+   "M": 0
+  },
+  {
+   "r": 55,
+   "A": "7.8"
+  },
+  {
+   "r": 56,
+   "A": "7.9"
+  },
+  {
+   "r": 57,
+   "A": "7.10"
+  },
+  {
+   "r": 58,
+   "A": 8,
+   "B": "Marcom"
+  },
+  {
+   "r": 59,
+   "A": "8.1"
+  },
+  {
+   "r": 60,
+   "A": "8.2"
+  },
+  {
+   "r": 61,
+   "A": "8.3",
+   "G": false
+  },
+  {
+   "r": 62,
+   "A": 9,
+   "B": "Exrel"
+  },
+  {
+   "r": 63,
+   "A": "9.1",
+   "B": "SOP CSR",
+   "E": "CAT",
+   "F": "New",
+   "G": false,
+   "H": 46265,
+   "I": 46295,
+   "M": 0
+  },
+  {
+   "r": 64,
+   "A": "9.2",
+   "G": false
+  },
+  {
+   "r": 65,
+   "A": "9.3",
+   "G": false
+  },
+  {
+   "r": 66,
+   "A": 10,
+   "B": "SPM"
+  },
+  {
+   "r": 67,
+   "A": "10.1",
+   "B": "SOP Pengendalian Dokumen (V2)",
+   "E": "CAT",
+   "F": "Revision",
+   "G": false,
+   "H": 46398,
+   "I": 46430
+  },
+  {
+   "r": 68,
+   "A": "10.2",
+   "B": "Kebijakan Continous Improvement Management",
+   "E": "CAT",
+   "F": "New"
+  },
+  {
+   "r": 69,
+   "A": "10.3",
+   "B": "Kebijakan 5R",
+   "E": "CAT",
+   "F": "New"
+  },
+  {
+   "r": 70,
+   "A": "10.4",
+   "B": "IK Tata Kelola PICA",
+   "E": "CAT",
+   "F": "New"
+  },
+  {
+   "r": 71,
+   "A": 11,
+   "B": "GBU"
+  },
+  {
+   "r": 72,
+   "A": "11.1",
+   "B": "Pedoman Teknis Weight Bridge",
+   "E": "Additional",
+   "F": "Revision",
+   "N": 0.8
+  },
+  {
+   "r": 73,
+   "A": "11.2",
+   "B": "Pedoman Teknis Penerimaan TBS",
+   "E": "Additional",
+   "F": "Revision",
+   "N": 0.8
+  },
+  {
+   "r": 74,
+   "A": 12,
+   "B": "Pilar Technology"
+  },
+  {
+   "r": 75,
+   "A": "12.1",
+   "B": "SOP Sales DTA",
+   "E": "Additional",
+   "F": "New",
+   "G": false,
+   "N": 0.3
+  },
+  {
+   "r": 76,
+   "A": 11
+  },
+  {
+   "r": 77,
+   "A": 12
+  },
+  {
+   "r": 78,
+   "L": "All"
+  },
+  {
+   "r": 79,
+   "L": "CAT"
+  },
+  {
+   "r": 80,
+   "L": "Additional"
+  },
+  {
+   "r": 81,
+   "L": "CAT+Additional"
+  },
+  {
+   "r": 91,
+   "G": 46388
+  },
+  {
+   "r": 92,
+   "H": "Bulan",
+   "I": "Target",
+   "J": "SOP Completion",
+   "K": "SOP Awareness",
+   "L": "Total",
+   "G": 46392
+  },
+  {
+   "r": 93,
+   "H": "Januari",
+   "I": 0.1,
+   "G": 46424
+  },
+  {
+   "r": 94,
+   "H": "Februari",
+   "I": 0.2,
+   "G": 46454
+  },
+  {
+   "r": 95,
+   "H": "Maret",
+   "I": 0.3,
+   "G": 46456
+  },
+  {
+   "r": 96,
+   "H": "April",
+   "I": 0.4,
+   "G": 46457
+  },
+  {
+   "r": 97,
+   "H": "Mei",
+   "I": 0.5,
+   "G": 46472
+  },
+  {
+   "r": 98,
+   "H": "Juni",
+   "I": 0.6,
+   "G": 46474
+  },
+  {
+   "r": 99,
+   "H": "Juli",
+   "I": 0.75,
+   "G": 46508
+  },
+  {
+   "r": 100,
+   "H": "Agustus",
+   "I": 0.8,
+   "G": 46513
+  },
+  {
+   "r": 101,
+   "H": "September",
+   "I": 0.85,
+   "G": 46524
+  },
+  {
+   "r": 102,
+   "H": "Oktober",
+   "I": 0.9,
+   "G": 46527
+  },
+  {
+   "r": 103,
+   "H": "November",
+   "I": 0.95,
+   "G": 46539
+  },
+  {
+   "r": 104,
+   "H": "Desember",
+   "I": 1,
+   "G": 46544
+  },
+  {
+   "r": 105,
+   "G": 46614
+  },
+  {
+   "r": 106,
+   "G": 46616
+  },
+  {
+   "r": 107,
+   "G": 46746
+  },
+  {
+   "r": 108,
+   "G": 46747
+  },
+  {
+   "r": 114,
+   "G": "Activity KPI",
+   "H": "Jan",
+   "I": "Feb",
+   "J": "Mar",
+   "K": "Apr",
+   "L": "Mei",
+   "M": "Jun",
+   "N": "Jul",
+   "O": "Aug",
+   "P": "Sep",
+   "Q": "Oct",
+   "R": "Nov",
+   "S": "Dec"
+  },
+  {
+   "r": 115,
+   "G": "SOP Completion",
+   "H": 0.2,
+   "Q": 0.7,
+   "R": 1.0,
+   "S": 1.2
+  },
+  {
+   "r": 116,
+   "G": "SOP Awareness",
+   "R": 0.8,
+   "S": 0.9
+  }
+ ]
+}
