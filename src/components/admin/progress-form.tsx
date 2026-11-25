@@ -1,57 +1,65 @@
 "use client";
 
 import { useState } from "react";
-import type { WorkflowStatus } from "@/lib/engine";
+import { PROGRESS_STAGES, exactStage, type WorkflowStatus } from "@/lib/engine";
 import { FieldError, Input, Label, Select } from "../ui";
 import { ActionMessage, SubmitButton, useAction } from "./form-status";
 
+/** Nilai select tahap: persentase tahap ("0", "30", …) atau "hold". "" = belum dipilih. */
+export type StageChoice = "" | "hold" | `${(typeof PROGRESS_STAGES)[number]["pct"]}`;
+
+export function initialStageChoice(status: WorkflowStatus | null, percent: number | null): StageChoice {
+  if (status === "Hold") return "hold";
+  if (status === null) return "";
+  const s = exactStage(percent === null ? null : percent / 100);
+  return s ? (String(s.pct) as StageChoice) : "";
+}
+
+/** Status & persentase yang disimpan untuk sebuah pilihan tahap. Hold mempertahankan persentase terakhir. */
+export function stagePayload(choice: Exclude<StageChoice, "">, currentPercent: number | null): { workflow_status: WorkflowStatus; progress_percentage: number } {
+  if (choice === "hold") return { workflow_status: "Hold", progress_percentage: Math.max(0, Math.min(100, Math.round(currentPercent ?? 0))) };
+  const st = PROGRESS_STAGES.find((s) => String(s.pct) === choice)!;
+  return { workflow_status: st.status, progress_percentage: st.pct };
+}
+
+export function StageOptions({ includeEmpty, emptyLabel }: { includeEmpty: boolean; emptyLabel: string }) {
+  return (
+    <>
+      {includeEmpty ? <option value="" disabled>{emptyLabel}</option> : null}
+      {PROGRESS_STAGES.map((s) => (
+        <option key={s.pct} value={String(s.pct)}>{s.pct}% – {s.label}</option>
+      ))}
+      <option value="hold">Hold (ditunda)</option>
+    </>
+  );
+}
+
 export function ProgressForm({ id, status, percent, actualEnd, legacyNote }: { id: string; status: WorkflowStatus | null; percent: number | null; actualEnd: string | null; legacyNote?: string }) {
   const { state, pending, run } = useAction();
-  // null = "Belum diinput": show it as such instead of pretending the SOP is Not Started.
-  const [st, setSt] = useState<WorkflowStatus | "">(status ?? "");
-  const [pct, setPct] = useState<number>(Math.round(percent ?? 0));
+  const [choice, setChoice] = useState<StageChoice>(initialStageChoice(status, percent));
   const [actual, setActual] = useState(actualEnd ?? "");
-  const onStatus = (v: WorkflowStatus) => {
-    setSt(v);
-    if (v === "Not Started") setPct(0);
-    if (v === "Completed") setPct(100);
-    if (v === "In Progress" && (pct <= 0 || pct >= 100)) setPct(50);
-  };
-  const onPct = (n: number) => {
-    const v = Math.max(0, Math.min(100, Math.round(n)));
-    setPct(v);
-    if (st !== "Hold") setSt(v === 0 ? "Not Started" : v === 100 ? "Completed" : "In Progress");
-  };
   const e = state.errors ?? {};
+  const offStage = status !== null && status !== "Hold" && choice === "" && percent !== null;
+  const selected = PROGRESS_STAGES.find((s) => String(s.pct) === choice);
   return (
     <form
       className="space-y-4"
       onSubmit={(ev) => {
         ev.preventDefault();
-        if (!st) return;
-        run("updateProgress", { id, workflow_status: st, progress_percentage: pct, actual_end_date: actual });
+        if (!choice) return;
+        run("updateProgress", { id, ...stagePayload(choice, percent), actual_end_date: actual });
       }}
     >
       {legacyNote ? <p className="rounded-lg bg-canvas px-3 py-2 text-xs text-ink-2">{legacyNote}</p> : null}
       <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <Label htmlFor="workflow_status">Status</Label>
-          <Select id="workflow_status" value={st} onChange={(ev) => onStatus(ev.target.value as WorkflowStatus)}>
-            {st === "" ? <option value="" disabled>Belum diinput – pilih status</option> : null}
-            <option>Not Started</option>
-            <option>In Progress</option>
-            <option>Completed</option>
-            <option>Hold</option>
+        <div className="sm:col-span-2">
+          <Label htmlFor="stage">Tahap progres</Label>
+          <Select id="stage" value={choice} onChange={(ev) => setChoice(ev.target.value as StageChoice)}>
+            <StageOptions includeEmpty={choice === ""} emptyLabel={offStage ? `Progres saat ini ${Math.round(percent!)}% – pilih tahap` : "Belum diinput – pilih tahap"} />
           </Select>
-          {st === "Hold" ? <p className="mt-1 text-xs text-warn">Hold dikecualikan dari pencapaian aktif.</p> : null}
-        </div>
-        <div>
-          <Label htmlFor="progress_percentage">Progress (%)</Label>
-          <div className="flex items-center gap-3">
-            <input type="range" min={0} max={100} value={pct} onChange={(ev) => onPct(Number(ev.target.value))} className="flex-1 accent-[var(--cat)]" aria-label="Progress slider" />
-            <Input id="progress_percentage" type="number" min={0} max={100} value={pct} onChange={(ev) => onPct(Number(ev.target.value))} className="w-20 text-right" />
-          </div>
-          <FieldError message={e.progress_percentage} />
+          {selected ? <p className="mt-1 text-xs text-ink-3">{selected.description}.</p> : null}
+          {choice === "hold" ? <p className="mt-1 text-xs text-warn">Hold dikecualikan dari pencapaian aktif; persentase terakhir ({Math.round(percent ?? 0)}%) tetap disimpan.</p> : null}
+          <FieldError message={e.progress_percentage ?? e.workflow_status} />
         </div>
         <div>
           <Label htmlFor="actual_end_date">Actual End Date</Label>
