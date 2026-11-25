@@ -65,7 +65,7 @@ Bila alamat website berubah (pindah organisasi GitHub / domain kustom), tambahka
 4. Master SOP → arsipkan SOP 2027 yang selesai, tambah SOP baru, atau impor sheet SPC tahun baru (System Settings → ID & nama sheet sumber).
 
 ### 3.6 Memperbarui tampilan / calculation engine
-Edit kode di GitHub → setiap *commit* ke `main` otomatis menjalankan 117 test lalu deploy. Bila test gagal, situs lama tetap tayang.
+Edit kode di GitHub → setiap *commit* ke `main` otomatis menjalankan 124 test lalu deploy. Bila test gagal, situs lama tetap tayang.
 Rumus hanya boleh diubah di `src/lib/engine` dan harus disertai pembaruan `docs/AUDIT_SPEC.md` + test.
 
 ## 4. Pemecahan masalah
