@@ -4,6 +4,7 @@
 import { formatDateId, monthShortId, ID_MONTHS_LONG } from "../engine/dates";
 import type { EngineResult } from "../engine";
 import type { Holiday } from "../engine/types";
+import { STAGE_LABEL, sopStage } from "../engine/progress";
 
 export const REPORT_TYPES = {
   "sop-master": "SOP Master List",
@@ -57,7 +58,7 @@ export function buildReport(type: ReportType, r: EngineResult, holidays: Holiday
           { key: "actual_days", header: "Actual Days", kind: "int", width: 10 },
           { key: "man_days", header: "Man Days", kind: "int", width: 9 },
           { key: "progress", header: "Progress", kind: "pct", width: 10 },
-          { key: "status", header: "Status", kind: "text", width: 12 },
+          { key: "status", header: "Status", kind: "text", width: 22 },
           { key: "remark", header: "Remark", kind: "text", width: 30 },
         ],
         rows: r.tasks.map((t) => ({
@@ -74,7 +75,7 @@ export function buildReport(type: ReportType, r: EngineResult, holidays: Holiday
           actual_days: t.actual_days,
           man_days: t.man_days,
           progress: pct(t.progress.value),
-          status: t.progress.status === "Not Input" ? "Belum diinput" : t.progress.status,
+          status: STAGE_LABEL[sopStage(t.progress)],
           remark: t.remark,
         })),
       };
