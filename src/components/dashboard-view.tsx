@@ -26,10 +26,10 @@ function Kpi({ label, value, hint, icon: Icon, tone = "ink" }: { label: string; 
   );
 }
 
-function OverallHero({ result, weights }: { result: EngineResult; weights: { cat: number; additional: number } }) {
+function OverallHero({ result }: { result: EngineResult }) {
   const o = result.overall;
-  const catContrib = o.pctCat === null ? 0 : (o.pctCat * weights.cat) / 100;
-  const addContrib = o.pctAdditional === null ? 0 : (o.pctAdditional * weights.additional) / 100;
+  const catContrib = o.catContribution ?? 0;
+  const addContrib = o.additionalContribution ?? 0;
   return (
     <Card className="relative overflow-hidden p-5 sm:p-6">
       <div className="absolute inset-y-0 left-0 w-1.5 bg-brand" aria-hidden />
@@ -40,14 +40,22 @@ function OverallHero({ result, weights }: { result: EngineResult; weights: { cat
           </p>
           <p className="mt-2 text-5xl font-semibold tracking-tight text-ink tabular">{fmtPct(o.overallAchievement)}</p>
           <p className="mt-1 text-xs text-ink-3">
-            {o.overallNote ?? `(% CAT × ${weights.cat}%) + (% Additional × ${weights.additional}%)`}
+            (% CAT × 100%) + (% Additional × bobot Additional)
           </p>
+          <p className="text-xs text-ink-3">
+            Bobot Additional = {o.nAdditional} SOP Additional ÷ ({o.nCat} SOP CAT + {o.nAdditional} SOP Additional) = {fmtPct(o.additionalWeight)}
+          </p>
+          {o.overallNote && <p className="text-xs text-warn">{o.overallNote}</p>}
         </div>
         <dl className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
           <dt className="text-ink-3">Overall % CAT</dt>
           <dd className="text-right font-semibold tabular">{fmtPct(o.pctCat)}</dd>
           <dt className="text-ink-3">Overall % Additional</dt>
           <dd className="text-right font-semibold tabular">{fmtPct(o.pctAdditional)}</dd>
+          <dt className="text-ink-3">Bobot CAT</dt>
+          <dd className="text-right tabular">{fmtPct(o.catWeight)}</dd>
+          <dt className="text-ink-3">Bobot Additional</dt>
+          <dd className="text-right tabular">{fmtPct(o.additionalWeight)}</dd>
           <dt className="text-ink-3">Divisi dengan CAT</dt>
           <dd className="text-right tabular">{o.orgsWithCat}</dd>
           <dt className="text-ink-3">Divisi dengan Additional</dt>
@@ -68,7 +76,7 @@ function OverallHero({ result, weights }: { result: EngineResult; weights: { cat
   );
 }
 
-export function DashboardView({ result, weights, today, adminLinks = false }: { result: EngineResult; weights: { cat: number; additional: number }; today: string; adminLinks?: boolean }) {
+export function DashboardView({ result, today, adminLinks = false }: { result: EngineResult; today: string; adminLinks?: boolean }) {
   const k = result.kpi;
   return (
     <div className="space-y-5">
@@ -80,7 +88,7 @@ export function DashboardView({ result, weights, today, adminLinks = false }: { 
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
-        <OverallHero result={result} weights={weights} />
+        <OverallHero result={result} />
         <Card>
           <CardHeader title="CAT vs Additional" description="Rata-rata persentase divisi yang memiliki data" />
           <div className="px-2 py-3"><CatVsAdditionalChart overall={result.overall} /></div>
