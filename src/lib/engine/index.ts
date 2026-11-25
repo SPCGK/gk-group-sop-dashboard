@@ -93,8 +93,8 @@ export function runEngine(input: EngineInput): EngineResult {
     .sort((a, b) => a.organization_sort - b.organization_sort || compareTaskNumber(a.task_number, b.task_number));
 
   const organizations = computeOrgPerformance(input.organizations, activeTasks, input.settings);
-  const overall = computeOverall(organizations, input.settings);
   const summary = statusSummary(activeTasks);
+  const overall = computeOverall(organizations, summary);
   const year = Number(input.settings.project.start.slice(0, 4)) || new Date().getFullYear();
 
   return {
