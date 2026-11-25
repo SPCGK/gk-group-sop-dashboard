@@ -6,7 +6,8 @@ import type { EngineResult, EnrichedTask, OrgPerformance } from "@/lib/engine";
 import { fmtPct } from "@/lib/engine";
 import { formatDateId } from "@/lib/engine/dates";
 import { DataTable, type Column, type FilterDef } from "./data-table";
-import { CategoryBadge, StatusBadge, STATUS_META } from "./status";
+import { CategoryBadge, StageBadge, STAGE_META, STAGE_ORDER } from "./status";
+import { sopStage } from "@/lib/engine/progress";
 import { Badge, ProgressBar } from "./ui";
 
 export function OrgPerformanceTable({ rows }: { rows: OrgPerformance[] }) {
@@ -77,8 +78,8 @@ export function SopOverviewTable({ result, adminLinks = false }: { result: Engin
     {
       key: "status",
       label: "Status",
-      options: (["Not Started", "Not Input", "In Progress", "Completed", "Hold"] as const).map((s) => ({ value: s, label: STATUS_META[s].label })),
-      match: (r, v) => r.progress.status === v,
+      options: STAGE_ORDER.map((s) => ({ value: s, label: STAGE_META[s].label })),
+      match: (r, v) => sopStage(r.progress) === v,
     },
     { key: "crit", label: "Critical", options: [{ value: "1", label: "Critical" }, { value: "0", label: "Non-Critical" }], match: (r, v) => r.critical === (v === "1") },
     { key: "flag", label: "Jadwal", options: [{ value: "overdue", label: "Overdue" }, { value: "none", label: "Tanpa jadwal" }], match: (r, v) => (v === "overdue" ? r.overdue : !r.start_date || !r.end_date) },
@@ -115,7 +116,7 @@ export function SopOverviewTable({ result, adminLinks = false }: { result: Engin
       ),
       sortValue: (r) => r.progress.value,
     },
-    { key: "status", header: "Status", cell: (r) => <StatusBadge status={r.progress.status} />, sortValue: (r) => r.progress.status },
+    { key: "status", header: "Status", cell: (r) => <StageBadge progress={r.progress} />, sortValue: (r) => STAGE_ORDER.indexOf(sopStage(r.progress)) },
     {
       key: "crit",
       header: "Critical",
