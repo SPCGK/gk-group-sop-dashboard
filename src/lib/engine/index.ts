@@ -2,7 +2,7 @@
 
 import { computeOrgPerformance, computeOverall, statusSummary, type OrgPerformance, type OverallResult } from "./aggregate";
 import { computeMonthly, type MonthlyRow } from "./monthly";
-import { sopProgress, type SopProgress } from "./progress";
+import { sopProgress, sopStage, type SopProgress, type StageKey } from "./progress";
 import { isOverdue } from "./gantt";
 import { actualDays, buildHolidaySet, isOnTime, manDays, mandays } from "./workdays";
 import type { EngineSettings, Holiday, MonthlyAchievement, MonthlyTarget, Organization, SopTask } from "./types";
@@ -53,8 +53,16 @@ export interface EngineResult {
     hold: number;
     overdue: number;
   };
+  /** Jumlah SOP aktif per tahap progres */
+  stages: Record<StageKey, number>;
   monthly: MonthlyRow[];
   year: number;
+}
+
+function countStages(tasks: readonly { progress: SopProgress }[]): Record<StageKey, number> {
+  const out: Record<StageKey, number> = { not_started: 0, bpo_discussion: 0, drafting: 0, final_review: 0, completed: 0, hold: 0, not_input: 0 };
+  for (const t of tasks) out[sopStage(t.progress)]++;
+  return out;
 }
 
 export function compareTaskNumber(a: string, b: string): number {
@@ -114,6 +122,7 @@ export function runEngine(input: EngineInput): EngineResult {
       hold: summary.all.hold,
       overdue: tasks.filter((t) => t.overdue).length,
     },
+    stages: countStages(tasks),
     monthly: computeMonthly(year, input.monthlyTargets, input.monthlyAchievements),
     year,
   };
