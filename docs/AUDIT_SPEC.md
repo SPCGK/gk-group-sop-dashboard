@@ -62,6 +62,20 @@ Status turunan data legacy: O terisi → Completed; N terisi → In Progress; M 
 
 SOP baru: satu input `progress_percentage` (0–100). Not Started = 0, In Progress = 1–99, Completed = 100.
 
+### 2.1a Tahapan progres (ditetapkan pengguna 25-11-2026)
+
+| Progres | Tahap | Arti | workflow_status tersimpan |
+|---|---|---|---|
+| 0% | Not Started | Belum dimulai | Not Started |
+| 30% | BPO Discussion | Diskusi dengan Business Process Owner | In Progress |
+| 50% | Drafting by SPC | Penyusunan draf oleh SPC | In Progress |
+| 80% | Final Review (Pre-BOD) | Finalisasi sebelum dipresentasikan ke BOD | In Progress |
+| 100% | Completed | Selesai | Completed |
+
+* Admin memilih tahap, bukan mengetik persentase. Hold tetap tersedia (persentase terakhir disimpan, dikecualikan dari pencapaian).
+* Hitungan Not Started / In Progress / Completed (baris 78–80) dan Overall Achievement tidak berubah.
+* Nilai lama di luar tahap (mis. 65%) ditampilkan pada tahap tertinggi yang telah dicapai (65% → Drafting by SPC) sampai Admin memilih tahap.
+
 ### 2.2 Filter keanggotaan divisi
 
 `REGEXMATCH(TO_TEXT(A);"^"&<no divisi>&"\.")` + `E = kategori` + `F <> "Hold"`.
