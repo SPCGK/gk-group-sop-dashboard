@@ -30,11 +30,11 @@ describe("Setup & storage round-trip", () => {
     expect(d.monthlyTargets).toHaveLength(12);
     expect(be.tab("audit_logs")).toBeTruthy();
   });
-  it("data read back from Google Sheets reproduces the workbook (Overall 16,95%)", () => {
+  it("data read back from Google Sheets reproduces the workbook (Overall 18,41%)", () => {
     const r = engine();
     expect(r.overall.pctCat).toBeCloseTo(0.0952380952, 9);
     expect(r.overall.pctAdditional).toBeCloseTo(0.4666666667, 9);
-    expect(r.overall.overallAchievement).toBeCloseTo(0.1695238095, 9);
+    expect(r.overall.overallAchievement).toBeCloseTo(0.1841269841, 9);
     expect(r.monthly.map((m) => Math.round(m.total * 100))).toEqual([20, 0, 0, 0, 0, 0, 0, 0, 0, 49, 94, 111]);
   });
   it("stores every cell as text so Sheets never turns task numbers or dates into numbers", () => {
@@ -220,11 +220,11 @@ describe("Organizations, holidays, monthly, settings, admins", () => {
     rows[0].completion_weight = 1.5;
     expect(be.post("saveMonthly", adminTok, { year: 2027, rows }).errors!.cw_1).toBeTruthy();
   });
-  it("weights must total 100; 70/30 changes Overall", () => {
+  it("legacy weight setting still validated; Overall uses proportional Additional weight", () => {
     const base = { project: { start: "2027-01-01", end: "2027-12-31" }, treat_uninput_as_zero: true };
     expect(be.post("saveSettings", adminTok, { ...base, weights: { cat: 80, additional: 30 } }).errors!.weight_cat).toBeTruthy();
     expect(be.post("saveSettings", adminTok, { ...base, weights: { cat: 70, additional: 30 } }).ok).toBe(true);
-    expect(engine().overall.overallAchievement).toBeCloseTo(0.0952380952 * 0.7 + 0.4666666667 * 0.3, 9);
+    expect(engine().overall.overallAchievement).toBeCloseTo(0.0952380952 + 0.4666666667 * (4 / 21), 9);
   });
   it("admins: add → can write; cannot deactivate self; last admin protected; deactivated admin loses access", () => {
     const succ = "successor@gankapital.com";
@@ -265,7 +265,7 @@ describe("Import from the source workbook", () => {
     const payload = { mode: "insert-only", includeMonthly: true, organizations: parsed.organizations, tasks: parsed.tasks, monthly: parsed.monthly };
     const r1 = be.post("importCommit", adminTok, payload);
     expect(r1.data).toMatchObject({ inserted: 26, skipped: 0, failed: [] });
-    expect(engine().overall.overallAchievement).toBeCloseTo(0.1695238095, 9);
+    expect(engine().overall.overallAchievement).toBeCloseTo(0.1841269841, 9);
     expect(be.post("importCommit", adminTok, payload).data).toMatchObject({ inserted: 0, skipped: 26 });
     const bad = be.post("importCommit", adminTok, { ...payload, tasks: [{ ...parsed.tasks[0], sop_name: "Baru", task_type: "XYZ" }] });
     expect(bad.data.failed[0].error).toMatch(/kategori/);
