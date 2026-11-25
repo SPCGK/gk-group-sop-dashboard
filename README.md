@@ -15,6 +15,7 @@ Gantt Chart, Monthly Achievement, hari libur, laporan, dan audit log.
 * Dashboard publik `/` tanpa login, read-only.
 * Panel admin `/admin/` – hanya email yang ada di tab `admins` yang dapat mengubah data. Pengecekan dilakukan di server (Apps Script), bukan di browser.
 * Semua perhitungan memakai satu calculation engine (`src/lib/engine`) sesuai [`docs/AUDIT_SPEC.md`](docs/AUDIT_SPEC.md).
+* **Overall Achievement** = (% CAT × 100%) + (% Additional × bobot Additional), dengan bobot Additional = Σ SOP Additional ÷ (Σ SOP CAT + Σ SOP Additional); SOP Hold & belum diinput tidak dihitung.
 * **Serah terima / pewarisan aplikasi:** baca [`docs/HANDOVER.md`](docs/HANDOVER.md).
 
 ---
@@ -54,7 +55,7 @@ Gantt Chart, Monthly Achievement, hari libur, laporan, dan audit log.
    Situs: `https://<akun-atau-organisasi>.github.io/gk-group-sop-dashboard/`.
 
 ### D. Cek
-* Dashboard publik tampil tanpa login dengan Overall Achievement awal **16,95%** (sama dengan sel M81 workbook).
+* Dashboard publik tampil tanpa login dengan Overall Achievement awal **18,41%** (sama dengan sel R82 workbook: 9,52% CAT + 8,89% Additional).
 * **Login Admin** → *Sign in with Google* → panel admin terbuka untuk email terdaftar; email lain ditolak.
 * Tambah SOP percobaan → muncul di Dashboard & Gantt → arsipkan → cek Audit Log.
 
@@ -68,7 +69,7 @@ Gantt Chart, Monthly Achievement, hari libur, laporan, dan audit log.
 | Tambah divisi/BU | Organization Management |
 | Libur nasional, cuti bersama, libur perusahaan | Holiday Management |
 | Target & input bulanan | Monthly Achievement |
-| Bobot CAT/Additional, periode project, Client ID, sumber impor | System Settings |
+| Periode project, Client ID, sumber impor | System Settings |
 | Tambah / nonaktifkan Administrator | System Settings → Administrator |
 | Impor dari sheet SPC Schedule (langsung atau CSV) | Master SOP → Import |
 | Unduh Excel / CSV / PDF | Reports & Export |
@@ -83,7 +84,7 @@ src/app/admin/          Login + 11 menu admin
 src/lib/engine/         ★ Calculation engine terpusat (satu-satunya tempat formula)
 src/lib/import/         Parser sheet SPC Schedule 2027
 src/lib/export/         Laporan Excel / CSV / PDF (dibuat di browser dari hasil engine)
-tests/                  115 test: engine vs workbook, parser, export, backend Apps Script
+tests/                  117 test: engine vs workbook, parser, export, backend Apps Script
 docs/AUDIT_SPEC.md      Spesifikasi formula & temuan audit
 docs/HANDOVER.md        Panduan pewarisan / serah terima
 .github/workflows/      Test + deploy otomatis ke GitHub Pages
@@ -93,7 +94,7 @@ docs/HANDOVER.md        Panduan pewarisan / serah terima
 
 ```bash
 npm ci
-npm test          # 115 test
+npm test          # 117 test
 npm run dev       # http://localhost:3000 (isi public/app-config.json dengan URL Web App)
 npm run build     # hasil statis di folder out/
 ```
