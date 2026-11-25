@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import type { AdminData, AdminRecord } from "@/lib/data-model";
 import { Badge, Button, Card, CardHeader, FieldError, Input, Label } from "../ui";
 import { ActionMessage, formObject, SubmitButton, useAction } from "./form-status";
@@ -8,10 +7,7 @@ import { ActionMessage, formObject, SubmitButton, useAction } from "./form-statu
 export function SettingsForm({ data }: { data: AdminData }) {
   const { state, pending, run } = useAction();
   const s = data.settings;
-  const [cat, setCat] = useState(s.weights.cat);
-  const [add, setAdd] = useState(s.weights.additional);
   const e = state.errors ?? {};
-  const total = Number(cat) + Number(add);
   return (
     <form
       className="space-y-6 p-5"
@@ -19,7 +15,8 @@ export function SettingsForm({ data }: { data: AdminData }) {
         ev.preventDefault();
         const v = formObject(ev.currentTarget);
         run("saveSettings", {
-          weights: { cat: Number(v.weight_cat), additional: Number(v.weight_additional) },
+          // Overall Achievement no longer uses fixed weights; the stored value is passed through unchanged.
+          weights: s.weights,
           project: { start: v.project_start, end: v.project_end, name: v.project_name },
           treat_uninput_as_zero: v.treat_uninput_as_zero === "true",
           oauth_client_id: v.oauth_client_id,
@@ -27,22 +24,11 @@ export function SettingsForm({ data }: { data: AdminData }) {
         });
       }}
     >
-      <fieldset>
-        <legend className="text-sm font-semibold">Bobot Overall Achievement</legend>
-        <p className="text-xs text-ink-3">Overall Achievement = (% CAT × bobot CAT) + (% Additional × bobot Additional). Total wajib 100%. Bobot tidak pernah diubah otomatis bila salah satu kategori kosong – hasil ditampilkan N/A.</p>
-        <div className="mt-3 grid max-w-md grid-cols-2 gap-3">
-          <div>
-            <Label htmlFor="weight_cat">CAT (%)</Label>
-            <Input id="weight_cat" name="weight_cat" type="number" min={0} max={100} step="0.01" value={cat} onChange={(ev) => setCat(Number(ev.target.value))} />
-          </div>
-          <div>
-            <Label htmlFor="weight_additional">Additional (%)</Label>
-            <Input id="weight_additional" name="weight_additional" type="number" min={0} max={100} step="0.01" value={add} onChange={(ev) => setAdd(Number(ev.target.value))} />
-          </div>
-        </div>
-        <p className={`mt-1 text-xs ${Math.abs(total - 100) < 1e-9 ? "text-ok" : "text-bad"}`}>Total: {total}%</p>
-        <FieldError message={e.weight_cat} />
-      </fieldset>
+      <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-xs text-ink-2">
+        <p className="font-semibold text-ink">Rumus Overall Achievement (otomatis)</p>
+        <p>Overall = (% CAT × 100%) + (% Additional × bobot Additional)</p>
+        <p>Bobot Additional = Σ SOP Additional ÷ (Σ SOP CAT + Σ SOP Additional) – SOP Hold dan belum diinput tidak dihitung.</p>
+      </div>
       <fieldset>
         <legend className="text-sm font-semibold">Periode Project</legend>
         <div className="mt-2 grid max-w-xl gap-3 sm:grid-cols-3">
