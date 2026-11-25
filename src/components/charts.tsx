@@ -17,7 +17,7 @@ import {
 } from "recharts";
 import type { EngineResult } from "@/lib/engine";
 import { monthShortId } from "@/lib/engine/dates";
-import { STATUS_META } from "./status";
+import { STAGE_META, STAGE_ORDER } from "./status";
 
 const AXIS = { fontSize: 11, fill: "#6b7280" };
 const GRID = "#eef0f3";
@@ -84,22 +84,17 @@ export function CatVsAdditionalChart({ overall }: { overall: EngineResult["overa
   );
 }
 
-export function StatusDistributionChart({ kpi }: { kpi: EngineResult["kpi"] }) {
-  const rows = [
-    { key: "Completed", value: kpi.completed },
-    { key: "In Progress", value: kpi.inProgress },
-    { key: "Not Started", value: kpi.notStarted },
-    { key: "Not Input", value: kpi.notInput },
-    { key: "Hold", value: kpi.hold },
-  ] as const;
-  const data = rows.map((r) => ({ name: STATUS_META[r.key].label, value: r.value, color: STATUS_META[r.key].color }));
+export function StatusDistributionChart({ stages }: { stages: EngineResult["stages"] }) {
+  // Tahap progres; "Belum diinput" hanya ditampilkan bila ada.
+  const keys = STAGE_ORDER.filter((k) => k !== "not_input" || stages.not_input > 0);
+  const data = keys.map((k) => ({ name: STAGE_META[k].pct !== null ? `${STAGE_META[k].label} (${STAGE_META[k].pct}%)` : STAGE_META[k].label, value: stages[k], color: STAGE_META[k].color }));
   return (
-    <div className="h-52" role="img" aria-label="Distribusi status SOP">
+    <div className="h-64" role="img" aria-label="Distribusi tahap progres SOP">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} layout="vertical" margin={{ top: 4, right: 40, left: 8, bottom: 4 }} barCategoryGap={10}>
           <CartesianGrid stroke={GRID} horizontal={false} />
           <XAxis type="number" allowDecimals={false} tick={AXIS} tickLine={false} axisLine={false} />
-          <YAxis type="category" dataKey="name" tick={{ ...AXIS, fill: "#374151" }} width={96} tickLine={false} axisLine={false} />
+          <YAxis type="category" dataKey="name" tick={{ ...AXIS, fill: "#374151" }} width={168} tickLine={false} axisLine={false} />
           <Tooltip content={<ChartTooltip kind="int" />} cursor={{ fill: "rgba(17,24,39,0.04)" }} />
           <Bar dataKey="value" name="Jumlah SOP" radius={[0, 4, 4, 0]} maxBarSize={22}>
             {data.map((d) => (
