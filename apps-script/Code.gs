@@ -37,6 +37,13 @@ var DOC_CLASSES = ['New', 'Revision'];
 var STATUSES = ['Not Started', 'In Progress', 'Completed', 'Hold'];
 var HOLIDAY_CATEGORIES = ['National Holiday', 'Joint Leave', 'Company Holiday', 'Other Holiday'];
 var PUBLIC_CACHE_KEY = 'publicData:v1';
+
+/**
+ * ID of the Google Sheet used as database (the part between /d/ and /edit in its URL).
+ * Lets this script also work as a standalone Apps Script project. To move the database, change this value
+ * or set Script Property DB_SPREADSHEET_ID (Project Settings → Script properties).
+ */
+var DB_SPREADSHEET_ID = '1J3fxwntNgMsfuS9M3UeQ5cScVNi6gjz55R7gi8ZNegk';
 var TOKENINFO_URL = 'https://oauth2.googleapis.com/tokeninfo?id_token=';
 
 // ------------------------------------------------------------------------------------------------
@@ -160,8 +167,18 @@ function requireAdmin_(email) {
 // ------------------------------------------------------------------------------------------------
 // Sheet-backed tables
 // ------------------------------------------------------------------------------------------------
+var ssCache_ = null;
 function ss_() {
-  return SpreadsheetApp.getActiveSpreadsheet();
+  if (ssCache_) return ssCache_;
+  var id = '';
+  try {
+    id = PropertiesService.getScriptProperties().getProperty('DB_SPREADSHEET_ID') || '';
+  } catch (x) {
+    /* properties unavailable */
+  }
+  id = id || DB_SPREADSHEET_ID;
+  ssCache_ = id ? SpreadsheetApp.openById(id) : SpreadsheetApp.getActiveSpreadsheet();
+  return ssCache_;
 }
 
 function colDefs_(name) {
