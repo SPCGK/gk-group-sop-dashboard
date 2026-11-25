@@ -84,7 +84,7 @@ src/app/admin/          Login + 11 menu admin
 src/lib/engine/         ★ Calculation engine terpusat (satu-satunya tempat formula)
 src/lib/import/         Parser sheet SPC Schedule 2027
 src/lib/export/         Laporan Excel / CSV / PDF (dibuat di browser dari hasil engine)
-tests/                  117 test: engine vs workbook, parser, export, backend Apps Script
+tests/                  124 test: engine vs workbook, parser, export, backend Apps Script
 docs/AUDIT_SPEC.md      Spesifikasi formula & temuan audit
 docs/HANDOVER.md        Panduan pewarisan / serah terima
 .github/workflows/      Test + deploy otomatis ke GitHub Pages
@@ -94,7 +94,7 @@ docs/HANDOVER.md        Panduan pewarisan / serah terima
 
 ```bash
 npm ci
-npm test          # 117 test
+npm test          # 124 test
 npm run dev       # http://localhost:3000 (isi public/app-config.json dengan URL Web App)
 npm run build     # hasil statis di folder out/
 ```
