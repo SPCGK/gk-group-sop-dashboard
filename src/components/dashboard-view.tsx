@@ -39,12 +39,6 @@ function OverallHero({ result }: { result: EngineResult }) {
             <Target className="size-4 text-brand-strong" aria-hidden /> Overall Achievement
           </p>
           <p className="mt-2 text-5xl font-semibold tracking-tight text-ink tabular">{fmtPct(o.overallAchievement)}</p>
-          <p className="mt-1 text-xs text-ink-3">
-            (% CAT × 100%) + (% Additional × bobot Additional)
-          </p>
-          <p className="text-xs text-ink-3">
-            Bobot Additional = {o.nAdditional} SOP Additional ÷ ({o.nCat} SOP CAT + {o.nAdditional} SOP Additional) = {fmtPct(o.additionalWeight)}
-          </p>
           {o.overallNote && <p className="text-xs text-warn">{o.overallNote}</p>}
         </div>
         <dl className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
@@ -52,14 +46,6 @@ function OverallHero({ result }: { result: EngineResult }) {
           <dd className="text-right font-semibold tabular">{fmtPct(o.pctCat)}</dd>
           <dt className="text-ink-3">Overall % Additional</dt>
           <dd className="text-right font-semibold tabular">{fmtPct(o.pctAdditional)}</dd>
-          <dt className="text-ink-3">Bobot CAT</dt>
-          <dd className="text-right tabular">{fmtPct(o.catWeight)}</dd>
-          <dt className="text-ink-3">Bobot Additional</dt>
-          <dd className="text-right tabular">{fmtPct(o.additionalWeight)}</dd>
-          <dt className="text-ink-3">Divisi dengan CAT</dt>
-          <dd className="text-right tabular">{o.orgsWithCat}</dd>
-          <dt className="text-ink-3">Divisi dengan Additional</dt>
-          <dd className="text-right tabular">{o.orgsWithAdditional}</dd>
         </dl>
       </div>
       <div className="mt-5">
