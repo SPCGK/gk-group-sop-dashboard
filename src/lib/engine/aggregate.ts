@@ -45,6 +45,15 @@ export interface OverallResult {
   overallNote: string | null;
   orgsWithCat: number;
   orgsWithAdditional: number;
+  /** Σ SOP CAT / Additional yang dihitung (Not Started + In Progress + Completed; tanpa Hold & Not Input) */
+  nCat: number;
+  nAdditional: number;
+  /** 1 (=100%) */
+  catWeight: number;
+  /** nAdditional ÷ (nCat + nAdditional), 0 bila tidak ada SOP */
+  additionalWeight: number;
+  catContribution: number | null;
+  additionalContribution: number | null;
 }
 
 function emptyCounts(): StatusCounts {
@@ -116,21 +125,46 @@ export function computeOrgPerformance(
     });
 }
 
-export function computeOverall(perf: readonly OrgPerformance[], settings: EngineSettings): OverallResult {
+/**
+ * Overall Achievement (workbook rows 78–82, rumus yang ditetapkan pengguna):
+ *   bobot CAT        = 100%
+ *   bobot Additional = Σ SOP Additional ÷ (Σ SOP CAT + Σ SOP Additional)      (Q81 = Q78/(P78+Q78))
+ *   Overall          = %CAT × 100% + %Additional × bobot Additional          (R82)
+ * Σ SOP = SOP aktif yang progresnya sudah diinput (Not Started + In Progress + Completed);
+ * Hold dan "Not Input" tidak dihitung — sama dengan baris 78 workbook.
+ * Bila tidak ada SOP Additional, bobot Additional = 0% dan hal itu ditampilkan (bukan diubah diam-diam).
+ */
+export function computeOverall(
+  perf: readonly OrgPerformance[],
+  summary: { cat: StatusCounts; additional: StatusCounts },
+): OverallResult {
   const catVals = perf.map((p) => p.pctCat).filter((v): v is number => v !== null);
   const addVals = perf.map((p) => p.pctAdditional).filter((v): v is number => v !== null);
   const pctCat = mean(catVals);
   const pctAdditional = mean(addVals);
-  const wc = checkWeights(settings.weights);
+  const counted = (c: StatusCounts) => c.notStarted + c.inProgress + c.completed;
+  const nCat = counted(summary.cat);
+  const nAdditional = counted(summary.additional);
+  const total = nCat + nAdditional;
+  const catWeight = 1;
+  const additionalWeight = total > 0 ? nAdditional / total : 0;
+
   let overallAchievement: number | null = null;
+  let catContribution: number | null = null;
+  let additionalContribution: number | null = null;
   let overallNote: string | null = null;
-  if (!wc.valid) overallNote = wc.message;
-  else if (pctCat === null && pctAdditional === null) overallNote = "Belum ada data CAT maupun Additional.";
-  else if (pctCat === null) overallNote = "Data CAT belum tersedia.";
-  else if (pctAdditional === null) overallNote = "Data Additional belum tersedia.";
-  else
-    overallAchievement =
-      (pctCat * settings.weights.cat) / 100 + (pctAdditional * settings.weights.additional) / 100;
+  if (pctCat === null && pctAdditional === null) {
+    overallNote = "Belum ada data CAT maupun Additional.";
+  } else {
+    catContribution = (pctCat ?? 0) * catWeight;
+    additionalContribution = (pctAdditional ?? 0) * additionalWeight;
+    overallAchievement = catContribution + additionalContribution;
+    if (!Number.isFinite(overallAchievement)) {
+      overallAchievement = catContribution = additionalContribution = null;
+      overallNote = "Perhitungan tidak valid.";
+    } else if (pctCat === null) overallNote = "Data CAT belum tersedia (dihitung 0%).";
+    else if (pctAdditional === null || nAdditional === 0) overallNote = "Tidak ada SOP Additional – bobot Additional 0%.";
+  }
   return {
     pctCat,
     pctAdditional,
@@ -138,6 +172,12 @@ export function computeOverall(perf: readonly OrgPerformance[], settings: Engine
     overallNote,
     orgsWithCat: catVals.length,
     orgsWithAdditional: addVals.length,
+    nCat,
+    nAdditional,
+    catWeight,
+    additionalWeight,
+    catContribution,
+    additionalContribution,
   };
 }
 
