@@ -108,8 +108,8 @@ export function DashboardView({ result, today, adminLinks = false }: { result: E
           <div className="px-2 py-3"><ProgressByOrganizationChart organizations={result.organizations} /></div>
         </Card>
         <Card>
-          <CardHeader title="SOP Status Distribution" description="Belum diinput = SOP hasil migrasi tanpa nilai progres" />
-          <div className="px-2 py-3"><StatusDistributionChart kpi={result.kpi} /></div>
+          <CardHeader title="SOP Status Distribution" description="Jumlah SOP per tahap progres (Hold tidak dihitung dalam pencapaian)" />
+          <div className="px-2 py-3"><StatusDistributionChart stages={result.stages} /></div>
         </Card>
       </div>
 
