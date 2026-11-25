@@ -37,7 +37,16 @@ describe("Workbook parity – division % CAT / % Additional (R14:S77)", () => {
 describe("Workbook parity – overall (R78, S78, M81)", () => {
   it("Overall % CAT = 9.5238% (R78 / P82)", () => expect(r.overall.pctCat).toBeCloseTo(0.0952380952, 9));
   it("Overall % Additional = 46.6667% (S78)", () => expect(r.overall.pctAdditional).toBeCloseTo(0.4666666667, 9));
-  it("Overall Achievement 80/20 = 16.9524% (M81 = 16,95%)", () => expect(r.overall.overallAchievement).toBeCloseTo(0.1695238095, 9));
+  it("Additional weight = 4 ÷ (17 + 4) = 19.05% (Q81)", () => {
+    expect(r.overall.nCat).toBe(17);
+    expect(r.overall.nAdditional).toBe(4);
+    expect(r.overall.additionalWeight).toBeCloseTo(0.1904761905, 9);
+  });
+  it("Overall Achievement = 9.52% + 8.89% = 18.41% (R82)", () => {
+    expect(r.overall.catContribution).toBeCloseTo(0.0952380952, 9);
+    expect(r.overall.additionalContribution).toBeCloseTo(0.0888888889, 9);
+    expect(r.overall.overallAchievement).toBeCloseTo(0.1841269841, 9);
+  });
   it("averages over 7 CAT divisions and 3 Additional divisions", () => {
     expect(r.overall.orgsWithCat).toBe(7);
     expect(r.overall.orgsWithAdditional).toBe(3);
