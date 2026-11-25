@@ -84,3 +84,48 @@ export function validateStatusProgress(status: WorkflowStatus, pct: number): str
   if (status === "In Progress" && (pct < 1 || pct > 99)) return "Status In Progress harus 1–99%.";
   return null;
 }
+
+/**
+ * Tahapan progres SOP (ditetapkan pengguna 25-11-2026). Progres diinput per tahap, bukan angka bebas.
+ * workflow_status yang disimpan tetap Not Started / In Progress / Completed sehingga hitungan
+ * workbook (baris 78–80) dan Overall Achievement tidak berubah.
+ */
+export const PROGRESS_STAGES = [
+  { key: "not_started", pct: 0, label: "Not Started", description: "Belum dimulai", status: "Not Started" },
+  { key: "bpo_discussion", pct: 30, label: "BPO Discussion", description: "Diskusi dengan Business Process Owner", status: "In Progress" },
+  { key: "drafting", pct: 50, label: "Drafting by SPC", description: "Penyusunan draf oleh SPC", status: "In Progress" },
+  { key: "final_review", pct: 80, label: "Final Review (Pre-BOD)", description: "Finalisasi sebelum dipresentasikan ke BOD", status: "In Progress" },
+  { key: "completed", pct: 100, label: "Completed", description: "Selesai", status: "Completed" },
+] as const;
+
+export type ProgressStage = (typeof PROGRESS_STAGES)[number];
+export type StageKey = ProgressStage["key"] | "hold" | "not_input";
+
+/** Stage of a SOP. In Progress values that are not exactly a stage fall to the highest stage reached. */
+export function sopStage(p: Pick<SopProgress, "status" | "value">): StageKey {
+  if (p.status === "Hold") return "hold";
+  if (p.status === "Not Input") return "not_input";
+  if (p.status === "Not Started") return "not_started";
+  if (p.status === "Completed") return "completed";
+  const pct = (p.value ?? 0) * 100;
+  if (pct >= 80) return "final_review";
+  if (pct >= 50) return "drafting";
+  return "bpo_discussion";
+}
+
+/** The stage whose percentage equals the value exactly (used to preselect inputs), else null. */
+export function exactStage(value: number | null): ProgressStage | null {
+  if (value === null) return null;
+  const pct = Math.round(value * 1000) / 10;
+  return PROGRESS_STAGES.find((s) => s.pct === pct) ?? null;
+}
+
+export const STAGE_LABEL: Record<StageKey, string> = {
+  not_started: PROGRESS_STAGES[0].label,
+  bpo_discussion: PROGRESS_STAGES[1].label,
+  drafting: PROGRESS_STAGES[2].label,
+  final_review: PROGRESS_STAGES[3].label,
+  completed: PROGRESS_STAGES[4].label,
+  hold: "Hold",
+  not_input: "Belum diinput",
+};
