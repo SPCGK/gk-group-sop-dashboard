@@ -16,11 +16,11 @@ export type AdminRow = EnrichedTask;
 function QuickProgress({ row }: { row: AdminRow }) {
   const { call } = useApp();
   const [pending, start] = useTransition();
-  const initialStatus = row.progress.status === "Not Input" ? "Not Started" : row.progress.status;
-  const [status, setStatus] = useState(initialStatus);
+  const initialStatus = row.progress.status === "Not Input" ? "" : row.progress.status;
+  const [status, setStatus] = useState<string>(initialStatus);
   const [pct, setPct] = useState(Math.round((row.progress.value ?? 0) * 100));
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
-  const dirty = status !== initialStatus || pct !== Math.round((row.progress.value ?? 0) * 100);
+  const dirty = status !== "" && (status !== initialStatus || pct !== Math.round((row.progress.value ?? 0) * 100));
   const onStatus = (v: typeof status) => {
     setStatus(v);
     if (v === "Not Started") setPct(0);
@@ -30,6 +30,7 @@ function QuickProgress({ row }: { row: AdminRow }) {
   return (
     <div className="flex min-w-[17rem] items-center gap-1.5">
       <select value={status} onChange={(e) => onStatus(e.target.value as typeof status)} className="h-8 rounded-md border border-line bg-white px-1.5 text-xs" aria-label={`Status ${row.task_number}`}>
+        {status === "" ? <option value="" disabled>Belum diinput</option> : null}
         <option>Not Started</option>
         <option>In Progress</option>
         <option>Completed</option>
@@ -115,8 +116,8 @@ export function AdminSopTable({ rows, organizations, mode }: { rows: AdminRow[];
   ];
   if (mode === "master") {
     columns.push(
-      { key: "cls", header: "New/Rev", cell: (r) => r.document_classification ?? "—", sortValue: (r) => r.document_classification ?? "~" },
-      { key: "crit", header: "Critical", cell: (r) => (r.critical ? <Badge tone="bad">Critical</Badge> : "—"), sortValue: (r) => (r.critical ? 0 : 1) },
+      { key: "cls", header: "New/Rev", cell: (r) => r.document_classification ?? <Badge tone="warn" title="Belum diisi – buka Edit lalu pilih New atau Revision">Belum diisi</Badge>, sortValue: (r) => r.document_classification ?? "~" },
+      { key: "crit", header: "Critical", cell: (r) => (r.critical ? <Badge tone="bad">Critical</Badge> : <span className="whitespace-nowrap text-xs text-ink-3">Non-Critical</span>), sortValue: (r) => (r.critical ? 0 : 1) },
       { key: "start", header: "Start", cell: (r) => <span className="whitespace-nowrap tabular">{formatDateId(r.start_date)}</span>, sortValue: (r) => r.start_date },
       { key: "end", header: "End", cell: (r) => <span className="whitespace-nowrap tabular">{formatDateId(r.end_date)}</span>, sortValue: (r) => r.end_date },
       { key: "prog", header: "Progress", cell: (r) => <span className="tabular">{r.progress.value === null ? "—" : fmtPct(r.progress.value, 0)}</span>, sortValue: (r) => r.progress.value },
