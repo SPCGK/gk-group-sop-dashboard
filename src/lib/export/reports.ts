@@ -35,7 +35,7 @@ export interface Report {
 
 const pct = (v: number | null) => (v === null || !Number.isFinite(v) ? null : v);
 
-export function buildReport(type: ReportType, r: EngineResult, holidays: Holiday[], weights: { cat: number; additional: number }): Report {
+export function buildReport(type: ReportType, r: EngineResult, holidays: Holiday[]): Report {
   const title = REPORT_TYPES[type];
   switch (type) {
     case "sop-master":
@@ -141,7 +141,11 @@ export function buildReport(type: ReportType, r: EngineResult, holidays: Holiday
       return {
         type,
         title,
-        notes: r.overall.overallNote ? [r.overall.overallNote] : [`Overall Achievement = (% CAT × ${weights.cat}%) + (% Additional × ${weights.additional}%)`],
+        notes: [
+          "Overall Achievement = (% CAT × 100%) + (% Additional × bobot Additional)",
+          `Bobot Additional = Σ SOP Additional ÷ (Σ SOP CAT + Σ SOP Additional) = ${r.overall.nAdditional} ÷ (${r.overall.nCat} + ${r.overall.nAdditional})`,
+          ...(r.overall.overallNote ? [r.overall.overallNote] : []),
+        ],
         columns: [
           { key: "metric", header: "Metric", kind: "text", width: 30 },
           { key: "weight", header: "Bobot", kind: "pct" },
@@ -151,17 +155,17 @@ export function buildReport(type: ReportType, r: EngineResult, holidays: Holiday
         rows: [
           {
             metric: "Overall % CAT",
-            weight: weights.cat / 100,
+            weight: r.overall.catWeight,
             value: pct(r.overall.pctCat),
-            contribution: r.overall.pctCat === null ? null : (r.overall.pctCat * weights.cat) / 100,
+            contribution: pct(r.overall.catContribution),
           },
           {
             metric: "Overall % Additional",
-            weight: weights.additional / 100,
+            weight: r.overall.additionalWeight,
             value: pct(r.overall.pctAdditional),
-            contribution: r.overall.pctAdditional === null ? null : (r.overall.pctAdditional * weights.additional) / 100,
+            contribution: pct(r.overall.additionalContribution),
           },
-          { metric: "Overall Achievement", weight: 1, value: pct(r.overall.overallAchievement), contribution: pct(r.overall.overallAchievement) },
+          { metric: "Overall Achievement", weight: "", value: pct(r.overall.overallAchievement), contribution: pct(r.overall.overallAchievement) },
         ],
       };
     case "monthly-achievement":
