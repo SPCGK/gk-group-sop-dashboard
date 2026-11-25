@@ -32,31 +32,51 @@ describe("1–3. CAT, Additional, Overall", () => {
     const r = runEngine(base([newTask({ task_type: "Additional", progress_percentage: 20, workflow_status: "In Progress" })]));
     expect(r.organizations[0].pctAdditional).toBeCloseTo(0.2);
   });
-  it("Overall = CAT×80% + Additional×20%", () => {
+  it("Overall = %CAT×100% + %Additional×(ΣAdd ÷ (ΣCAT+ΣAdd))", () => {
     const r = runEngine(
       base([
         newTask({ progress_percentage: 50, workflow_status: "In Progress" }),
+        newTask({ progress_percentage: 0, workflow_status: "Not Started" }),
+        newTask({ progress_percentage: 30, workflow_status: "In Progress" }),
         newTask({ task_type: "Additional", progress_percentage: 100, workflow_status: "Completed" }),
       ]),
     );
-    expect(r.overall.overallAchievement).toBeCloseTo(0.5 * 0.8 + 1 * 0.2);
+    expect(r.overall.nCat).toBe(3);
+    expect(r.overall.nAdditional).toBe(1);
+    expect(r.overall.catWeight).toBe(1);
+    expect(r.overall.additionalWeight).toBeCloseTo(0.25);
+    expect(r.overall.overallAchievement).toBeCloseTo((0.5 + 0 + 0.3) / 3 + 1 * 0.25);
   });
-  it("custom weights 70/30 are applied", () => {
+  it("Hold and Not Input SOPs are not counted in the Additional weight", () => {
+    const r = runEngine(
+      base([
+        newTask({ progress_percentage: 50, workflow_status: "In Progress" }),
+        newTask({ workflow_status: "Hold" }),
+        newTask({ progress_source: "legacy", progress_percentage: null as never }),
+        newTask({ task_type: "Additional", progress_percentage: 100, workflow_status: "Completed" }),
+      ]),
+    );
+    expect(r.overall.nCat).toBe(1);
+    expect(r.overall.additionalWeight).toBeCloseTo(0.5);
+  });
+  it("fixed weight settings (e.g. 70/30) do not change Overall", () => {
     const input = base([newTask({ progress_percentage: 50, workflow_status: "In Progress" }), newTask({ task_type: "Additional", progress_percentage: 100, workflow_status: "Completed" })]);
-    const r = runEngine({ ...input, settings: { ...DEFAULT_SETTINGS, weights: { cat: 70, additional: 30 } } });
-    expect(r.overall.overallAchievement).toBeCloseTo(0.65);
+    const a = runEngine(input).overall.overallAchievement;
+    const b = runEngine({ ...input, settings: { ...DEFAULT_SETTINGS, weights: { cat: 70, additional: 30 } } }).overall.overallAchievement;
+    expect(a).toBeCloseTo(0.5 + 1 * 0.5);
+    expect(b).toBe(a);
   });
-  it("weights not summing to 100 → N/A, never silently re-weighted", () => {
-    const input = base([newTask({ progress_percentage: 50, workflow_status: "In Progress" }), newTask({ task_type: "Additional", progress_percentage: 100, workflow_status: "Completed" })]);
-    const r = runEngine({ ...input, settings: { ...DEFAULT_SETTINGS, weights: { cat: 80, additional: 30 } } });
-    expect(r.overall.overallAchievement).toBeNull();
-    expect(r.overall.overallNote).toMatch(/100%/);
-  });
-  it("one category without data → Overall N/A (not 100% of the other)", () => {
+  it("no Additional SOP → Additional weight 0%, Overall = %CAT, stated in note", () => {
     const r = runEngine(base([newTask({ progress_percentage: 50, workflow_status: "In Progress" })]));
     expect(r.overall.pctCat).toBeCloseTo(0.5);
-    expect(r.overall.overallAchievement).toBeNull();
+    expect(r.overall.additionalWeight).toBe(0);
+    expect(r.overall.overallAchievement).toBeCloseTo(0.5);
     expect(r.overall.overallNote).toMatch(/Additional/);
+  });
+  it("no data at all → N/A, never NaN", () => {
+    const r = runEngine(base([]));
+    expect(r.overall.overallAchievement).toBeNull();
+    expect(r.overall.additionalWeight).toBe(0);
   });
 });
 
@@ -278,7 +298,7 @@ describe("25. Export consistency", () => {
   const input = workbookInput();
   const r = runEngine(input);
   it("division report = engine values", () => {
-    const rep = buildReport("division-progress", r, input.holidays, input.settings.weights);
+    const rep = buildReport("division-progress", r, input.holidays);
     for (const row of rep.rows) {
       const o = r.organizations.find((x) => x.organization.organization_name === row.organization)!;
       expect(row.pct_cat).toBe(o.pctCat);
@@ -286,21 +306,21 @@ describe("25. Export consistency", () => {
     }
   });
   it("overall report = engine values", () => {
-    const rep = buildReport("overall-achievement", r, input.holidays, input.settings.weights);
+    const rep = buildReport("overall-achievement", r, input.holidays);
     expect(rep.rows[2].value).toBe(r.overall.overallAchievement);
     expect((rep.rows[0].contribution as number) + (rep.rows[1].contribution as number)).toBeCloseTo(r.overall.overallAchievement!, 12);
   });
   it("SOP master list has one row per active SOP with engine progress", () => {
-    const rep = buildReport("sop-master", r, input.holidays, input.settings.weights);
+    const rep = buildReport("sop-master", r, input.holidays);
     expect(rep.rows).toHaveLength(26);
     expect(rep.rows.find((x) => x.task_number === "4.3")!.progress).toBe(0.5);
   });
   it("CSV contains the same overall numbers", () => {
-    const csv = toCsv(buildReport("cat-achievement", r, input.holidays, input.settings.weights));
+    const csv = toCsv(buildReport("cat-achievement", r, input.holidays));
     expect(csv).toContain("9.5238");
   });
   it("monthly and holiday reports", () => {
-    expect(buildReport("monthly-achievement", r, input.holidays, input.settings.weights).rows[11].total).toBeCloseTo(1.11);
-    expect(buildReport("holidays", r, input.holidays, input.settings.weights).rows).toHaveLength(26);
+    expect(buildReport("monthly-achievement", r, input.holidays).rows[11].total).toBeCloseTo(1.11);
+    expect(buildReport("holidays", r, input.holidays).rows).toHaveLength(26);
   });
 });
