@@ -6,7 +6,7 @@ import { ChevronDown, ChevronRight, Flame, Search, X, CalendarClock } from "luci
 import type { EnrichedTask, Holiday, Organization } from "@/lib/engine";
 import { barGeometry, buildTimeline, DAY_WIDTH, fmtPct, type GanttScale } from "@/lib/engine";
 import { formatDateId, isValidIsoDate, ID_MONTHS_LONG, monthShortId, toDayNumber } from "@/lib/engine/dates";
-import { StatusBadge } from "./status";
+import { StageBadge } from "./status";
 import { Button, cn, Input, Select } from "./ui";
 
 const ROW_H = 36;
@@ -343,7 +343,7 @@ function DetailCard({ task: t, onClose, adminLinks, note }: { task: EnrichedTask
         <dt className="text-ink-3">Progress</dt>
         <dd className="text-right tabular">{t.progress.value === null ? "Belum diinput" : fmtPct(t.progress.value, 0)}</dd>
         <dt className="text-ink-3">Status</dt>
-        <dd className="text-right"><StatusBadge status={t.progress.status} /></dd>
+        <dd className="text-right"><StageBadge progress={t.progress} /></dd>
       </dl>
       {jointInRange ? (
         <p className="mt-2 flex items-center gap-1 text-[11px] text-ink-3"><CalendarClock className="size-3" />{jointInRange} cuti bersama dalam periode ini masih dihitung hari kerja.</p>
