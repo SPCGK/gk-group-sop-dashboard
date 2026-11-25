@@ -7,7 +7,8 @@ import { ActionMessage, SubmitButton, useAction } from "./form-status";
 
 export function ProgressForm({ id, status, percent, actualEnd, legacyNote }: { id: string; status: WorkflowStatus | null; percent: number | null; actualEnd: string | null; legacyNote?: string }) {
   const { state, pending, run } = useAction();
-  const [st, setSt] = useState<WorkflowStatus>(status ?? "Not Started");
+  // null = "Belum diinput": show it as such instead of pretending the SOP is Not Started.
+  const [st, setSt] = useState<WorkflowStatus | "">(status ?? "");
   const [pct, setPct] = useState<number>(Math.round(percent ?? 0));
   const [actual, setActual] = useState(actualEnd ?? "");
   const onStatus = (v: WorkflowStatus) => {
@@ -27,6 +28,7 @@ export function ProgressForm({ id, status, percent, actualEnd, legacyNote }: { i
       className="space-y-4"
       onSubmit={(ev) => {
         ev.preventDefault();
+        if (!st) return;
         run("updateProgress", { id, workflow_status: st, progress_percentage: pct, actual_end_date: actual });
       }}
     >
@@ -35,6 +37,7 @@ export function ProgressForm({ id, status, percent, actualEnd, legacyNote }: { i
         <div>
           <Label htmlFor="workflow_status">Status</Label>
           <Select id="workflow_status" value={st} onChange={(ev) => onStatus(ev.target.value as WorkflowStatus)}>
+            {st === "" ? <option value="" disabled>Belum diinput – pilih status</option> : null}
             <option>Not Started</option>
             <option>In Progress</option>
             <option>Completed</option>
