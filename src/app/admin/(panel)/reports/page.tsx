@@ -39,7 +39,7 @@ export default function ReportsPage() {
     setBusy(`${type}-${format}`);
     setError(null);
     try {
-      const rep = buildReport(type, eng.result, eng.input.holidays, eng.input.settings.weights);
+      const rep = buildReport(type, eng.result, eng.input.holidays);
       const base = `GK-SOP-${type}-${todayJakarta()}`;
       const meta = { generatedBy: auth.email ?? "admin" };
       if (format === "csv") download(toCsv(rep), "text/csv;charset=utf-8", `${base}.csv`);
