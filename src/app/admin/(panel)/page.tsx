@@ -13,7 +13,7 @@ export default function AdminDashboardPage() {
       <div className="mb-4 flex justify-end gap-2">
         <Link href="/admin/sop/new/" className={buttonClass("secondary", "sm")}><PlusCircle className="size-4" />Add New SOP</Link>
       </div>
-      <DashboardView result={eng.result} weights={eng.input.settings.weights} today={eng.input.today} adminLinks />
+      <DashboardView result={eng.result} today={eng.input.today} adminLinks />
     </>
   );
 }
