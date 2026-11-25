@@ -122,6 +122,7 @@ export function createBackend(opts: { owner?: string; source?: FakeSpreadsheet }
     SpreadsheetApp: {
       getActiveSpreadsheet: () => ss,
       openById: (id: string) => {
+        if (id === "1J3fxwntNgMsfuS9M3UeQ5cScVNi6gjz55R7gi8ZNegk") return ss;
         if (!opts.source || id !== "13Sd-CqyoLq9cJVCsUMAj-HVWGoQtG41d4RywBPyMntc") throw new Error("not found");
         return opts.source;
       },
@@ -136,6 +137,7 @@ export function createBackend(opts: { owner?: string; source?: FakeSpreadsheet }
         remove: (k: string) => void cache.delete(k),
       }),
     },
+    PropertiesService: { getScriptProperties: () => ({ getProperty: () => null }) },
     LockService: { getScriptLock: () => ({ tryLock: () => true, releaseLock: () => undefined }) },
     UrlFetchApp: {
       fetch: (url: string) => {
