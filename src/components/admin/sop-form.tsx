@@ -48,14 +48,16 @@ export function SopForm({ organizations, task }: { organizations: Organization[]
               </label>
             ))}
           </div>
+          {task && !task.task_type ? <p className="mt-1 text-xs text-warn">Belum diisi – pilih CAT atau Additional.</p> : null}
           <FieldError message={e.task_type} />
         </fieldset>
         <fieldset>
           <legend className="mb-1 text-xs font-medium text-ink-2">New / Revision *</legend>
+          {task && !task.document_classification ? <p className="mb-1 text-xs text-warn">Belum diisi – pilih New atau Revision.</p> : null}
           <div className="flex gap-2">
             {(["New", "Revision"] as const).map((v) => (
               <label key={v} className="flex flex-1 cursor-pointer items-center gap-2 rounded-lg border border-line px-3 py-2 text-sm has-[:checked]:border-ink has-[:checked]:bg-canvas">
-                <input type="radio" name="document_classification" value={v} defaultChecked={(task?.document_classification ?? "New") === v} className="accent-[var(--ink)]" /> {v}
+                <input type="radio" name="document_classification" value={v} defaultChecked={(task ? task.document_classification : "New") === v} className="accent-[var(--ink)]" /> {v}
               </label>
             ))}
           </div>
