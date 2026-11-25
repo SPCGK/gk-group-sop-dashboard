@@ -76,8 +76,12 @@ Engine: `organization_id` + `task_type` + `workflow_status <> 'Hold'` + `is_acti
 
 * `R78 = AVERAGE(FILTER(R14:R77; R<>""; A divisi))` → Overall % CAT = rata-rata % CAT divisi yang punya data CAT.
 * `S78` sama untuk Additional.
-* `M81 = (R78*80%)+(S78*20%)` → **Overall Achievement** (bobot dapat diubah Admin, total wajib 100%).
-* Salah satu kategori tidak punya data → Overall = **N/A** (sheet akan `#VALUE!`; bobot tidak di-redistribusi).
+* `P78` / `Q78` = jumlah SOP CAT / Additional yang dihitung (Not Started + In Progress + Completed; Hold & Not Input tidak dihitung).
+* **Bobot CAT = 100%.**
+* **Bobot Additional** `Q81 = Q78/(P78+Q78)` = Σ SOP Additional ÷ (Σ SOP CAT + Σ SOP Additional).
+* **Overall Achievement** `R82 = R78×100% + S78×Q81` (rumus resmi, ditetapkan pengguna 25-11-2026; menggantikan `M81 = (R78*80%)+(S78*20%)`).
+* Tidak ada SOP Additional → bobot Additional 0% dan Overall = % CAT; catatan ini ditampilkan di dashboard. Tidak ada data sama sekali → **N/A** (tidak pernah NaN / bagi nol).
+* Overall dapat > 100% (Additional bersifat tambahan di atas CAT); nilai tidak dipotong.
 
 ### 2.5 Hitungan status (baris 78–80)
 
@@ -128,7 +132,9 @@ Input awal (G115:S116): Completion Jan 20%, Okt 70%, Nov 100%, Des 120%; Awarene
 | Pilar Technology | 0 | 1 | N/A | 30,00% |
 
 * Overall % CAT = **9,5238%** (66,667 / 7) · Overall % Additional = **46,6667%** (140 / 3)
-* Overall Achievement (80/20) = **16,9524%** (sheet `M81` = 16,95%)
+* Bobot Additional = 4 ÷ (17 + 4) = **19,0476%** (sheet `Q81` = 19,05%)
+* Overall Achievement = 9,5238% + 46,6667% × 19,0476% = 9,5238% + 8,8889% = **18,4127%** (sheet `R82` = 18,41%)
+* (Rumus lama 80/20 di `M81` = 16,95% – tidak dipakai lagi)
 * Status: All 15 / 6 / 0 · CAT 15 / 2 / 0 · Additional 0 / 4 / 0
 * Total SOP bernama: 26 (21 CAT, 4 Additional, 1 tanpa kategori)
 * Mandays: 22/03–30/04/2027 = 28 · 03/05–11/06/2027 = 25 · 11/01–12/02/2027 = 24 · 15/02–24/03/2027 = 24 · 31/08–30/09/2026 = 22 · 01/10–30/10/2026 = 21
@@ -147,7 +153,7 @@ Input awal (G115:S116): Completion Jan 20%, Okt 70%, Nov 100%, Des 120%; Awarene
 | D6 | `J`/`L` saat tanggal kosong → `-1` atau angka negatif besar (mis. `-33187`) | Nilai tidak bermakna | Engine mengembalikan `null` ("—") |
 | D7 | `T` (Man Days) baris divisi: H/I divisi kosong → `" - "`; `T29` merujuk `H32/I32`; `T19` `#REF!` | Tidak ada nilai Man Days valid per divisi | `manDays()` dihitung per SOP (NETWORKDAYS inklusif tanpa libur) |
 | D8 | Fill progres Gantt memakai `$S` (kolom %Additional divisi) — pada baris SOP kosong → fill tidak pernah tampil | Progres tidak tervisualisasi | Memakai progres SOP masing-masing |
-| D9 | Alternatif `Q81 = Q78/(P78+Q78)` (bobot berbasis jumlah, 19,05%) dan `R82 = 18,41%` | Dua angka "overall" berbeda di sheet | Mengikuti requirement: bobot tetap 80/20 (`M81`) |
+| D9 | Alternatif `Q81 = Q78/(P78+Q78)` (bobot berbasis jumlah, 19,05%) dan `R82 = 18,41%` | Dua angka "overall" berbeda di sheet | **Diputuskan pengguna (25-11-2026): pakai `Q81`/`R82`** – bobot CAT 100%, bobot Additional proporsional. `M81` (80/20) tidak dipakai |
 | D10 | Label `P78` "Total CAT" sebenarnya = jumlah SOP CAT yang ber-input (17) | Rawan salah baca | Dashboard memakai label eksplisit |
 | D11 | Baris tanpa nama namun berisi atribut: 2.2 (Revision), 2.4 (New, 01/10–30/10/2026), 5.1 (New, Critical) | Bukan SOP valid | Dilewati saat migrasi, dicatat di laporan import |
 | D12 | `1.2 "xxxx"` (Additional, 30%) — nama placeholder namun memengaruhi % Additional Legal & overall | Menghapusnya mengubah hasil | Dimigrasi apa adanya + peringatan "nama placeholder" |
