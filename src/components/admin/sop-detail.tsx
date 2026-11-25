@@ -8,7 +8,7 @@ import { useAdminEngine, useApp } from "../app-provider";
 import { DangerZone } from "./danger-zone";
 import { ProgressForm } from "./progress-form";
 import { SopForm } from "./sop-form";
-import { CategoryBadge, StatusBadge } from "../status";
+import { CategoryBadge, StageBadge } from "../status";
 import { Alert, Badge, Card, CardHeader } from "../ui";
 import { fmtPct, runEngine, sopProgress, type WorkflowStatus } from "@/lib/engine";
 import { formatDateId } from "@/lib/engine/dates";
@@ -46,7 +46,7 @@ export function SopDetail() {
         <h1 className="text-xl font-semibold sm:text-2xl">{task.sop_name}</h1>
         <div className="mt-2 flex flex-wrap gap-2">
           <CategoryBadge type={task.task_type} />
-          <StatusBadge status={prog.status} />
+          <StageBadge progress={prog} />
           {task.critical ? <Badge tone="bad">Critical</Badge> : null}
           {!task.is_active ? <Badge tone="warn">Diarsipkan</Badge> : null}
           {et.overdue ? <Badge tone="bad">Overdue</Badge> : null}
@@ -73,7 +73,7 @@ export function SopDetail() {
         </Card>
         <div className="space-y-5">
           <Card>
-            <CardHeader title="Update Progres" description="Not Started = 0% · In Progress = 1–99% · Completed = 100% · Hold dikecualikan" />
+            <CardHeader title="Update Progres" description="0% Not Started · 30% BPO Discussion · 50% Drafting by SPC · 80% Final Review (Pre-BOD) · 100% Completed" />
             <div className="p-5">
               <ProgressForm id={task.id} status={status} percent={prog.value === null ? null : prog.value * 100} actualEnd={task.actual_end_date} legacyNote={legacyNote} />
             </div>
