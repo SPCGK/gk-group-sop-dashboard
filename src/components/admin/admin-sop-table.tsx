@@ -8,7 +8,9 @@ import type { EnrichedTask, Organization } from "@/lib/engine";
 import { fmtPct } from "@/lib/engine";
 import { formatDateId } from "@/lib/engine/dates";
 import { DataTable, type Column, type FilterDef } from "../data-table";
-import { CategoryBadge, StatusBadge, STATUS_META } from "../status";
+import { CategoryBadge, StageBadge, STAGE_META, STAGE_ORDER } from "../status";
+import { initialStageChoice, stagePayload, StageOptions, type StageChoice } from "./progress-form";
+import { sopStage } from "@/lib/engine/progress";
 import { Badge, cn } from "../ui";
 
 export type AdminRow = EnrichedTask;
@@ -16,42 +18,24 @@ export type AdminRow = EnrichedTask;
 function QuickProgress({ row }: { row: AdminRow }) {
   const { call } = useApp();
   const [pending, start] = useTransition();
-  const initialStatus = row.progress.status === "Not Input" ? "" : row.progress.status;
-  const [status, setStatus] = useState<string>(initialStatus);
-  const [pct, setPct] = useState(Math.round((row.progress.value ?? 0) * 100));
+  const status = row.progress.status === "Not Input" ? null : row.progress.status;
+  const percent = row.progress.value === null ? null : row.progress.value * 100;
+  const initial = initialStageChoice(status, percent);
+  const [choice, setChoice] = useState<StageChoice>(initial);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
-  const dirty = status !== "" && (status !== initialStatus || pct !== Math.round((row.progress.value ?? 0) * 100));
-  const onStatus = (v: typeof status) => {
-    setStatus(v);
-    if (v === "Not Started") setPct(0);
-    if (v === "Completed") setPct(100);
-    if (v === "In Progress" && (pct <= 0 || pct >= 100)) setPct(50);
-  };
+  const dirty = choice !== "" && choice !== initial;
   return (
     <div className="flex min-w-[17rem] items-center gap-1.5">
-      <select value={status} onChange={(e) => onStatus(e.target.value as typeof status)} className="h-8 rounded-md border border-line bg-white px-1.5 text-xs" aria-label={`Status ${row.task_number}`}>
-        {status === "" ? <option value="" disabled>Belum diinput</option> : null}
-        <option>Not Started</option>
-        <option>In Progress</option>
-        <option>Completed</option>
-        <option>Hold</option>
+      <select value={choice} onChange={(e) => setChoice(e.target.value as StageChoice)} className="h-8 max-w-[14rem] rounded-md border border-line bg-white px-1.5 text-xs" aria-label={`Tahap progres ${row.task_number}`}>
+        <StageOptions includeEmpty={choice === ""} emptyLabel={status && percent !== null ? `${Math.round(percent)}% – pilih tahap` : "Belum diinput"} />
       </select>
-      <input
-        type="number"
-        min={0}
-        max={100}
-        value={pct}
-        onChange={(e) => setPct(Math.max(0, Math.min(100, Number(e.target.value))))}
-        className="h-8 w-16 rounded-md border border-line px-1.5 text-right text-xs tabular"
-        aria-label={`Progress ${row.task_number}`}
-      />
-      <span className="text-xs text-ink-3">%</span>
       <button
         type="button"
         disabled={!dirty || pending}
         onClick={() =>
           start(async () => {
-            const r = await call("updateProgress", { id: row.id, workflow_status: status, progress_percentage: pct, actual_end_date: row.actual_end_date ?? "" });
+            if (!choice) return;
+            const r = await call("updateProgress", { id: row.id, ...stagePayload(choice, percent), actual_end_date: row.actual_end_date ?? "" });
             setMsg({ ok: r.ok, text: r.ok ? "Tersimpan" : (r.errors?.progress_percentage ?? r.message ?? "Gagal") });
           })
         }
@@ -90,7 +74,7 @@ export function AdminSopTable({ rows, organizations, mode }: { rows: AdminRow[];
   const filters: FilterDef<AdminRow>[] = [
     { key: "org", label: "Organisasi", options: organizations.map((o) => ({ value: o.id, label: o.organization_name })), match: (r, v) => r.organization_id === v },
     { key: "type", label: "Kategori", options: [{ value: "CAT", label: "CAT" }, { value: "Additional", label: "Additional" }, { value: "-", label: "Tanpa kategori" }], match: (r, v) => (v === "-" ? !r.task_type : r.task_type === v) },
-    { key: "status", label: "Status", options: (["Not Started", "Not Input", "In Progress", "Completed", "Hold"] as const).map((s) => ({ value: s, label: STATUS_META[s].label })), match: (r, v) => r.progress.status === v },
+    { key: "status", label: "Status", options: STAGE_ORDER.map((s) => ({ value: s, label: STAGE_META[s].label })), match: (r, v) => sopStage(r.progress) === v },
   ];
   if (mode === "master") filters.push({ key: "active", label: "Arsip", options: [{ value: "1", label: "Aktif" }, { value: "0", label: "Diarsipkan" }], match: (r, v) => r.is_active === (v === "1") });
 
@@ -121,7 +105,7 @@ export function AdminSopTable({ rows, organizations, mode }: { rows: AdminRow[];
       { key: "start", header: "Start", cell: (r) => <span className="whitespace-nowrap tabular">{formatDateId(r.start_date)}</span>, sortValue: (r) => r.start_date },
       { key: "end", header: "End", cell: (r) => <span className="whitespace-nowrap tabular">{formatDateId(r.end_date)}</span>, sortValue: (r) => r.end_date },
       { key: "prog", header: "Progress", cell: (r) => <span className="tabular">{r.progress.value === null ? "—" : fmtPct(r.progress.value, 0)}</span>, sortValue: (r) => r.progress.value },
-      { key: "status", header: "Status", cell: (r) => <StatusBadge status={r.progress.status} />, sortValue: (r) => r.progress.status },
+      { key: "status", header: "Status", cell: (r) => <StageBadge progress={r.progress} />, sortValue: (r) => STAGE_ORDER.indexOf(sopStage(r.progress)) },
       {
         key: "act",
         header: "",
@@ -136,7 +120,7 @@ export function AdminSopTable({ rows, organizations, mode }: { rows: AdminRow[];
   } else {
     columns.push(
       { key: "end", header: "End Date", cell: (r) => <span className="whitespace-nowrap tabular">{formatDateId(r.end_date)}</span>, sortValue: (r) => r.end_date },
-      { key: "status", header: "Status saat ini", cell: (r) => <StatusBadge status={r.progress.status} />, sortValue: (r) => r.progress.status },
+      { key: "status", header: "Status saat ini", cell: (r) => <StageBadge progress={r.progress} />, sortValue: (r) => STAGE_ORDER.indexOf(sopStage(r.progress)) },
       { key: "upd", header: "Update progres", cell: (r) => <QuickProgress key={`${r.id}-${r.updated_at}`} row={r} /> },
     );
   }
