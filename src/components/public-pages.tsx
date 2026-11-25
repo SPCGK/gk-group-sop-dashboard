@@ -18,7 +18,7 @@ function useLoaded() {
 export function PublicDashboard() {
   const s = useLoaded();
   if (!s.result) return s.node;
-  return <DashboardView result={s.result} weights={s.input.settings.weights} today={s.input.today} />;
+  return <DashboardView result={s.result} today={s.input.today} />;
 }
 
 export function PublicGantt() {
