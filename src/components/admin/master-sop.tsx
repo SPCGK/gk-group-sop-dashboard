@@ -1,11 +1,41 @@
 "use client";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { PlusCircle, Upload } from "lucide-react";
+import { useState } from "react";
+import { ChevronDown, ChevronRight, GanttChartSquare, PlusCircle, Upload } from "lucide-react";
+import { GanttChart } from "../gantt-chart";
 import { runEngine } from "@/lib/engine";
 import { useAdminEngine } from "../app-provider";
 import { AdminSopTable } from "./admin-sop-table";
 import { Alert, buttonClass, Card, PageTitle } from "../ui";
+
+function GanttPanel() {
+  const eng = useAdminEngine();
+  const [open, setOpen] = useState(true);
+  if (!eng) return null;
+  return (
+    <Card className="mb-4">
+      <button type="button" onClick={() => setOpen((o) => !o)} className="flex w-full items-center gap-2 px-5 py-3 text-left" aria-expanded={open}>
+        {open ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
+        <GanttChartSquare className="size-4 text-brand-strong" aria-hidden />
+        <span className="text-sm font-semibold">Gantt Chart</span>
+        <span className="text-xs text-ink-3">– klik bar/nama SOP lalu “Edit” untuk mengatur jadwal; di halaman Edit, Gantt pratinjau ikut bergerak saat tanggal diubah.</span>
+      </button>
+      {open ? (
+        <GanttChart
+          tasks={eng.result.tasks}
+          organizations={eng.input.organizations}
+          holidays={eng.input.holidays}
+          projectStart={eng.input.settings.project.start}
+          projectEnd={eng.input.settings.project.end}
+          today={eng.input.today}
+          maxHeight="50vh"
+          adminLinks
+        />
+      ) : null}
+    </Card>
+  );
+}
 
 export function MasterSop() {
   const sp = useSearchParams();
@@ -28,6 +58,7 @@ export function MasterSop() {
         }
       />
       {sp.get("deleted") ? <div className="mb-4"><Alert tone="ok">SOP dihapus permanen.</Alert></div> : null}
+      <GanttPanel />
       <Card>
         <AdminSopTable rows={rows} organizations={eng.allOrganizations} mode="master" />
       </Card>
