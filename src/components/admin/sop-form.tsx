@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { buildHolidaySet, holidaysWithin, mandays, workdayAdd, type Holiday, type Organization, type SopTask } from "@/lib/engine";
 import { formatDateId } from "@/lib/engine/dates";
@@ -50,10 +50,13 @@ function MandaysInfo({ start, end, holidays, onSetEnd }: { start: string; end: s
   );
 }
 
-export function SopForm({ organizations, task, holidays = [] }: { organizations: Organization[]; task?: SopTask; holidays?: Holiday[] }) {
+export function SopForm({ organizations, task, holidays = [], onDatesChange }: { organizations: Organization[]; task?: SopTask; holidays?: Holiday[]; onDatesChange?: (start: string, end: string) => void }) {
   const router = useRouter();
   const [start, setStart] = useState(task?.start_date ?? "");
   const [end, setEnd] = useState(task?.end_date ?? "");
+  useEffect(() => {
+    onDatesChange?.(start, end);
+  }, [start, end, onDatesChange]);
   const { state, pending, run } = useAction<{ id: string; task_number: string }>();
   const e = state.errors ?? {};
   const activeOrgs = organizations.filter((o) => o.is_active || o.id === task?.organization_id).sort((a, b) => a.sort_order - b.sort_order);
