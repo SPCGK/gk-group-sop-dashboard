@@ -66,3 +66,33 @@ export function isOnTime(actual: number | null, planned: number | null): boolean
   if (actual === null || planned === null) return null;
   return actual <= planned;
 }
+
+/** True when the date is a working day (Mon–Fri and not in the holiday set). */
+export function isWorkingDay(iso: string, holidays: HolidaySet = EMPTY_HOLIDAYS): boolean {
+  if (!isValidIsoDate(iso)) return false;
+  const d = toDayNumber(iso);
+  const dow = (((d + 4) % 7) + 7) % 7;
+  return dow !== 0 && dow !== 6 && !holidays.has(iso);
+}
+
+/**
+ * Google Sheets WORKDAY(start; n; holidays): the n-th working day after `start` (n ≥ 0).
+ * n = 0 returns `start` itself. End = workdayAdd(start, 25) gives Mandays (NETWORKDAYS − 1) = 25
+ * when `start` is a working day.
+ */
+export function workdayAdd(start: string, n: number, holidays: HolidaySet = EMPTY_HOLIDAYS): string | null {
+  if (!isValidIsoDate(start) || !Number.isInteger(n) || n < 0 || n > 2000) return null;
+  let d = toDayNumber(start);
+  let left = n;
+  while (left > 0) {
+    d++;
+    if (isWorkingDay(new Date(d * 86_400_000).toISOString().slice(0, 10), holidays)) left--;
+  }
+  return new Date(d * 86_400_000).toISOString().slice(0, 10);
+}
+
+/** Holidays (non-working, Mon–Fri) that fall inside [start, end]. */
+export function holidaysWithin(start: string | null, end: string | null, holidays: HolidaySet): string[] {
+  if (!isValidIsoDate(start) || !isValidIsoDate(end) || start > end) return [];
+  return [...holidays].filter((h) => h >= start && h <= end && isWorkingDay(h)).sort();
+}
