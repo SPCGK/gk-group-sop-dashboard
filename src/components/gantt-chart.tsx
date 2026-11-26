@@ -20,6 +20,8 @@ export function GanttChart({
   projectEnd,
   today,
   adminLinks = false,
+  highlightId,
+  maxHeight = "70vh",
 }: {
   tasks: EnrichedTask[];
   organizations: Organization[];
@@ -28,6 +30,9 @@ export function GanttChart({
   projectEnd: string;
   today: string;
   adminLinks?: boolean;
+  /** SOP yang sedang diedit: baris & bar diberi warna sorotan dan chart menggulir ke jadwalnya. */
+  highlightId?: string;
+  maxHeight?: string;
 }) {
   const [scale, setScale] = useState<GanttScale>("week");
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
@@ -98,14 +103,24 @@ export function GanttChart({
   const weeks = useMemo(() => days.filter((d) => d.index % 7 === 0), [days]);
   const todayIdx = days.findIndex((d) => d.isToday);
 
+  const highlightStart = highlightId ? tasks.find((t) => t.id === highlightId)?.start_date ?? null : null;
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    // Scroll to today when it falls inside the project period, otherwise to the project start.
+    // Scroll to the highlighted SOP; else to today when inside the project period; else to the project start.
     const inProject = today >= projectStart && today <= projectEnd;
-    const target = inProject && todayIdx >= 0 ? todayIdx : Math.max(0, toDayNumber(projectStart) - toDayNumber(tlStart));
+    const target =
+      highlightStart && isValidIsoDate(highlightStart)
+        ? Math.max(0, toDayNumber(highlightStart) - toDayNumber(tlStart))
+        : inProject && todayIdx >= 0
+          ? todayIdx
+          : Math.max(0, toDayNumber(projectStart) - toDayNumber(tlStart));
     el.scrollLeft = Math.max(0, target * dw - 120);
-  }, [scale, dw, todayIdx, projectStart, projectEnd, today, tlStart]);
+    if (highlightId) {
+      const row = el.querySelector<HTMLElement>(`[data-task-row="${highlightId}"]`);
+      if (row) el.scrollTop = Math.max(0, row.offsetTop - 120);
+    }
+  }, [scale, dw, todayIdx, projectStart, projectEnd, today, tlStart, highlightStart, highlightId]);
 
   const toggle = (id: string) =>
     setCollapsed((s) => {
@@ -160,7 +175,7 @@ export function GanttChart({
       ) : null}
 
       {/* Chart */}
-      <div ref={scrollRef} className="scroll-thin relative max-h-[70vh] overflow-auto border-t border-line" style={{ overscrollBehaviorX: "contain" }}>
+      <div ref={scrollRef} className="scroll-thin relative overflow-auto border-t border-line" style={{ overscrollBehaviorX: "contain", maxHeight }}>
         <div className="relative" style={{ width: `calc(var(--gantt-left) + ${width}px)`, ["--gantt-left" as string]: "clamp(150px, 32vw, 320px)" }}>
           {/* Header */}
           <div className="sticky top-0 z-20 flex border-b border-line bg-white">
@@ -235,12 +250,13 @@ export function GanttChart({
                     list.map((t) => {
                       const g = barGeometry(t, t.progress, tlStart, days.length, today);
                       const hold = t.progress.status === "Hold";
+                      const hl = t.id === highlightId;
                       return (
-                        <div key={t.id} className="relative z-[1] flex border-b border-line/70 hover:bg-brand-soft/30" style={{ height: ROW_H }}>
+                        <div key={t.id} data-task-row={t.id} className={cn("relative z-[1] flex border-b border-line/70 hover:bg-brand-soft/30", hl && "bg-brand-soft/60")} style={{ height: ROW_H }}>
                           <button
                             type="button"
                             onClick={() => setSelected(t)}
-                            className="sticky left-0 z-10 flex shrink-0 items-center gap-2 border-r border-line bg-white px-3 text-left"
+                            className={cn("sticky left-0 z-10 flex shrink-0 items-center gap-2 border-r border-line px-3 text-left", hl ? "bg-brand-soft font-semibold" : "bg-white")}
                             style={{ width: "var(--gantt-left)" }}
                           >
                             <span className="w-9 shrink-0 text-[11px] text-ink-3 tabular">{t.task_number}</span>
@@ -254,7 +270,7 @@ export function GanttChart({
                                 onClick={() => setSelected(t)}
                                 className={cn(
                                   "absolute top-2 h-5 overflow-hidden rounded-[4px] border text-left",
-                                  hold ? "border-warn bg-amber-100" : "border-cat/60 bg-blue-100",
+                                  hl ? "border-brand-strong bg-amber-200 ring-2 ring-brand" : hold ? "border-warn bg-amber-100" : "border-cat/60 bg-blue-100",
                                   g.overdue && "border-bad ring-2 ring-bad/40",
                                   t.critical && "border-l-4 border-l-bad",
                                 )}
