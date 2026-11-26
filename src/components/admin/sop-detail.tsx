@@ -2,15 +2,17 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useAdminEngine, useApp } from "../app-provider";
 import { DangerZone } from "./danger-zone";
+import { GanttChart } from "../gantt-chart";
+import { isValidIsoDate } from "@/lib/engine/dates";
 import { ProgressForm } from "./progress-form";
 import { SopForm } from "./sop-form";
 import { CategoryBadge, StageBadge } from "../status";
 import { Alert, Badge, Card, CardHeader } from "../ui";
-import { fmtPct, runEngine, sopProgress, type WorkflowStatus } from "@/lib/engine";
+import { fmtPct, runEngine, sopProgress, type EnrichedTask, type WorkflowStatus } from "@/lib/engine";
 import { formatDateId } from "@/lib/engine/dates";
 import type { HistoryRow } from "@/lib/data-model";
 
@@ -20,6 +22,9 @@ export function SopDetail() {
   const eng = useAdminEngine();
   const { call, adminData } = useApp();
   const [history, setHistory] = useState<HistoryRow[] | null>(null);
+  // Tanggal yang sedang diketik di form → pratinjau Gantt (sebelum disimpan).
+  const [draft, setDraft] = useState<{ id: string; start: string; end: string } | null>(null);
+  const onDatesChange = useCallback((start: string, end: string) => setDraft({ id, start, end }), [id]);
 
   useEffect(() => {
     if (!id) return;
@@ -69,7 +74,7 @@ export function SopDetail() {
       <div className="grid gap-5 lg:grid-cols-[1.2fr_1fr]">
         <Card>
           <CardHeader title="Data SOP" description="Perubahan tanggal langsung memperbarui Gantt Chart dan perhitungan hari kerja." />
-          <div className="p-5"><SopForm organizations={eng.allOrganizations} task={task} holidays={eng.input.holidays} /></div>
+          <div className="p-5"><SopForm organizations={eng.allOrganizations} task={task} holidays={eng.input.holidays} onDatesChange={onDatesChange} /></div>
         </Card>
         <div className="space-y-5">
           <Card>
@@ -102,6 +107,41 @@ export function SopDetail() {
           </Card>
         </div>
       </div>
+      <SchedulePreview taskId={task.id} enriched={et} draft={draft && draft.id === task.id ? draft : null} />
     </div>
+  );
+}
+
+/** Gantt pratinjau: SOP ini (disorot) di antara SOP lain, memakai tanggal yang sedang diketik di form. */
+function SchedulePreview({ taskId, enriched, draft }: { taskId: string; enriched: EnrichedTask; draft: { start: string; end: string } | null }) {
+  const eng = useAdminEngine();
+  const tasks = useMemo(() => {
+    if (!eng) return [];
+    const start = draft ? (isValidIsoDate(draft.start) ? draft.start : null) : enriched.start_date;
+    const end = draft ? (isValidIsoDate(draft.end) ? draft.end : null) : enriched.end_date;
+    const me = { ...enriched, start_date: start, end_date: end, overdue: false };
+    const others = eng.result.tasks.filter((t) => t.id !== taskId);
+    return [...others, me].sort((a, b) => a.organization_sort - b.organization_sort || a.task_seq - b.task_seq);
+  }, [eng, taskId, enriched, draft]);
+  if (!eng) return null;
+  const changed = draft && (draft.start !== (enriched.start_date ?? "") || draft.end !== (enriched.end_date ?? ""));
+  return (
+    <Card>
+      <CardHeader
+        title="Gantt Chart – pratinjau jadwal"
+        description={changed ? "Bar emas = SOP ini dengan tanggal di form (belum disimpan). Klik “Simpan perubahan” untuk menerapkan." : "Bar emas = SOP ini. Ubah Start/End Date di form untuk melihat posisinya terhadap SOP lain."}
+      />
+      <GanttChart
+        tasks={tasks}
+        organizations={eng.allOrganizations.filter((o) => o.is_active || o.id === enriched.organization_id)}
+        holidays={eng.input.holidays}
+        projectStart={eng.input.settings.project.start}
+        projectEnd={eng.input.settings.project.end}
+        today={eng.input.today}
+        highlightId={taskId}
+        maxHeight="55vh"
+        adminLinks
+      />
+    </Card>
   );
 }
