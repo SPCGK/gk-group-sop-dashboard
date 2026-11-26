@@ -10,7 +10,7 @@ export default function NewSopPage() {
     <div className="max-w-3xl">
       <PageTitle title="Add New SOP" description="Task Number dibuat otomatis. SOP baru dimulai dengan status Not Started (0%) dan langsung muncul di Dashboard serta Gantt Chart." />
       <Card className="p-5">
-        <SopForm organizations={eng.allOrganizations} />
+        <SopForm organizations={eng.allOrganizations} holidays={eng.input.holidays} />
       </Card>
     </div>
   );
