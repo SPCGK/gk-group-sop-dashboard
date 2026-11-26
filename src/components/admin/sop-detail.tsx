@@ -69,7 +69,7 @@ export function SopDetail() {
       <div className="grid gap-5 lg:grid-cols-[1.2fr_1fr]">
         <Card>
           <CardHeader title="Data SOP" description="Perubahan tanggal langsung memperbarui Gantt Chart dan perhitungan hari kerja." />
-          <div className="p-5"><SopForm organizations={eng.allOrganizations} task={task} /></div>
+          <div className="p-5"><SopForm organizations={eng.allOrganizations} task={task} holidays={eng.input.holidays} /></div>
         </Card>
         <div className="space-y-5">
           <Card>
